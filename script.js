@@ -94,10 +94,24 @@ function loadTheme() {
 
 // ====== TRÍCH XUẤT TỰ ĐỘNG ======
 function extractCode(text) {
-    let codeMatch = text.match(/--([A-Za-z0-9]+)--/);
-    if (codeMatch) return codeMatch[0];
+    // Tìm mã định dạng: --XXXXX-- (có thể chứa _, -, chữ và số)
+    let codeMatch = text.match(/--([A-Za-z0-9_\-]+)--/);
+    if (codeMatch) return codeMatch[1]; // Trả về phần bên trong, không bao gồm --
     
-    codeMatch = text.match(/[A-Za-z0-9]{8,15}/);
+    // Tìm mã định dạng: [[XXXXX]] (có thể chứa _, -, chữ và số)
+    codeMatch = text.match(/\[\[([A-Za-z0-9_\-]+)\]\]/);
+    if (codeMatch) return codeMatch[1];
+    
+    // Tìm mã định dạng: {XXXXX} (có thể chứa _, -, chữ và số)
+    codeMatch = text.match(/\{([A-Za-z0-9_\-]+)\}/);
+    if (codeMatch) return codeMatch[1];
+    
+    // Tìm mã định dạng: *XXXXX* (có thể chứa _, -, chữ và số)
+    codeMatch = text.match(/\*([A-Za-z0-9_\-]+)\*/);
+    if (codeMatch) return codeMatch[1];
+    
+    // Tìm bất kỳ chuỗi ký tự nào có thể là mã (có chứa _, -, chữ và số, dài 8-20 ký tự)
+    codeMatch = text.match(/[A-Za-z0-9_\-]{8,20}/);
     if (codeMatch) return codeMatch[0];
     
     return null;
@@ -139,16 +153,19 @@ function extractFromText() {
     // 1. Trích xuất mã
     const code = extractCode(text);
     if (code) {
-        exchangeCode.value = code;
-        showToast(`✅ Đã tìm thấy mã: ${code}`, 'success');
+        // Hiển thị mã với định dạng -- để người dùng biết
+        const displayCode = code.startsWith('--') ? code : `--${code}--`;
+        exchangeCode.value = displayCode;
+        showToast(`✅ Đã tìm thấy mã: ${displayCode}`, 'success');
     } else {
-        showToast('⚠️ Không tìm thấy mã trong văn bản.', 'warning');
+        showToast('⚠️ Không tìm thấy mã trong văn bản. Vui lòng nhập thủ công.', 'warning');
     }
     
-    // 2. Tìm thẻ
+    // 2. Tìm thẻ "đổi đi" và "cần"
     let haveCardId = null;
     let needCardId = null;
     
+    // Các pattern tìm kiếm
     const exchangePatterns = [
         /đổi\s+([^,。.!?]+?)\s+(lấy|với)\s+([^,。.!?]+?)(?:\s|$|\.|,|!|\?)/i,
         /muốn\s+đổi\s+([^,。.!?]+?)\s+(lấy|với)\s+([^,。.!?]+?)(?:\s|$|\.|,|!|\?)/i,
@@ -167,6 +184,7 @@ function extractFromText() {
         }
     }
     
+    // Nếu không tìm thấy pattern, thử tìm từ "lấy"
     if (!haveText && !needText) {
         const parts = text.split(/lấy|với/i);
         if (parts.length >= 2) {
@@ -184,7 +202,9 @@ function extractFromText() {
         }
     }
     
+    // Tìm thẻ dựa trên text đã trích xuất
     if (haveText || needText) {
+        // Tìm thẻ "có" (đổi đi)
         for (const card of CARDS) {
             if (haveText && (haveText.includes(card.name) || haveText.includes(card.character))) {
                 haveCardId = card.id;
@@ -192,6 +212,7 @@ function extractFromText() {
             }
         }
         
+        // Tìm thẻ "cần" (nhận về)
         for (const card of CARDS) {
             if (needText && (needText.includes(card.name) || needText.includes(card.character))) {
                 needCardId = card.id;
@@ -200,6 +221,7 @@ function extractFromText() {
         }
     }
     
+    // Fallback: nếu không tìm thấy qua pattern, thử tìm trực tiếp trong text
     if (!haveCardId || !needCardId) {
         let foundCards = [];
         for (const card of CARDS) {
@@ -217,20 +239,22 @@ function extractFromText() {
         }
     }
     
+    // Cập nhật UI
     if (haveCardId) {
         haveSelect.value = haveCardId;
         showToast(`📤 Tìm thấy thẻ có: ${CARDS.find(c => c.id === haveCardId).name}`, 'success');
     } else {
-        showToast('⚠️ Không tìm thấy thẻ "có".', 'warning');
+        showToast('⚠️ Không tìm thấy thẻ "có" (muốn đổi đi). Vui lòng chọn thủ công.', 'warning');
     }
     
     if (needCardId) {
         needSelect.value = needCardId;
         showToast(`📥 Tìm thấy thẻ cần: ${CARDS.find(c => c.id === needCardId).name}`, 'success');
     } else {
-        showToast('⚠️ Không tìm thấy thẻ "cần".', 'warning');
+        showToast('⚠️ Không tìm thấy thẻ "cần" (muốn nhận về). Vui lòng chọn thủ công.', 'warning');
     }
     
+    // Highlight success/error
     if (code && haveCardId && needCardId) {
         textInput.classList.add('extract-success');
         setTimeout(() => textInput.classList.remove('extract-success'), 2000);
@@ -504,6 +528,8 @@ function renderExchanges(exchanges) {
         const haveCard = CARDS.find(c => c.id === item.haveCardId);
         const needCard = CARDS.find(c => c.id === item.needCardId);
         const isUsed = item.isUsed || false;
+        // Hiển thị mã với định dạng --XXXX-- để dễ nhận biết
+        const displayCode = item.code.length > 0 ? `--${item.code}--` : item.code;
         
         html += `
             <div class="exchange-card ${isUsed ? 'used' : ''}">
@@ -511,7 +537,7 @@ function renderExchanges(exchanges) {
                     <span class="card-badge have">📤 ${haveCard ? haveCard.name : 'Không rõ'}</span>
                     <span class="card-arrow">➜</span>
                     <span class="card-badge need">📥 ${needCard ? needCard.name : 'Không rõ'}</span>
-                    <span class="card-code">${item.code}</span>
+                    <span class="card-code">${displayCode}</span>
                 </div>
                 <div class="card-actions">
                     <span class="card-time">⏱️ ${formatTime(item.createdAt)}</span>
@@ -610,7 +636,7 @@ function loadExchanges(haveCardId = '', needCardId = '', timeFilter = 'all') {
 function postExchange() {
     const haveCardId = parseInt(haveSelect.value);
     const needCardId = parseInt(needSelect.value);
-    const code = exchangeCode.value.trim();
+    let code = exchangeCode.value.trim();
     const originalText = textInput.value.trim();
     
     if (!haveCardId || !needCardId) {
@@ -626,6 +652,20 @@ function postExchange() {
     if (!code) {
         showToast('Vui lòng nhập mã trao đổi từ game!', 'error');
         return;
+    }
+    
+    // Kiểm tra nếu mã vẫn còn chứa -- hoặc [[
+    if (code.startsWith('--') && code.endsWith('--')) {
+        code = code.substring(2, code.length - 2);
+    }
+    if (code.startsWith('[[') && code.endsWith(']]')) {
+        code = code.substring(2, code.length - 2);
+    }
+    if (code.startsWith('{') && code.endsWith('}')) {
+        code = code.substring(1, code.length - 1);
+    }
+    if (code.startsWith('*') && code.endsWith('*')) {
+        code = code.substring(1, code.length - 1);
     }
     
     if (code.length < 5) {
@@ -703,7 +743,7 @@ function resetFilter() {
 
 // ====== REALTIME LISTENER ======
 function setupRealtimeListener() {
-    let query = exchangesRef.orderBy('createdAt', 'desc').limit(50);
+    let query = exchangesRef.orderBy('createdAt', 'desc').limit(150);
     
     query.onSnapshot(snapshot => {
         if (!currentFilter.have && !currentFilter.need && currentFilter.time === 'all') {
