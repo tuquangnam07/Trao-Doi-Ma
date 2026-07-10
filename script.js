@@ -511,7 +511,7 @@ function resetFilter() {
 
 // Realtime listener
 function setupRealtimeListener() {
-    let query = exchangesRef.orderBy('createdAt', 'desc').limit(5000);
+    let query = exchangesRef.orderBy('createdAt', 'desc').limit(120);
     
     query.onSnapshot(snapshot => {
         if (!currentFilter.have && !currentFilter.need) {
