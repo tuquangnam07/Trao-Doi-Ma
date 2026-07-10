@@ -12,7 +12,7 @@ const CARDS = [
     { id: 10, name: 'Thẻ bí ẩn (Mystery Card)', character: 'Ẩn' }
 ];
 
-// Các từ khóa tìm kiếm cho mỗi thẻ (để matching)
+// Các từ khóa tìm kiếm cho mỗi thẻ
 const CARD_KEYWORDS = {
     1: ['elandorr', 'mộng giới', 'thần chủ'],
     2: ['aya', 'công chúa', 'cầu vồng'],
@@ -30,19 +30,27 @@ const CARD_KEYWORDS = {
 const exchangesRef = db.collection('exchanges');
 
 // State
-let currentFilter = { have: '', need: '' };
+let currentFilter = { have: '', need: '', time: 'all' };
 let allExchanges = [];
+let unreadCount = 0;
+let lastNotificationTime = null;
+let notificationEnabled = true;
 
 // DOM Elements
 const haveSelect = document.getElementById('haveCard');
 const needSelect = document.getElementById('needCard');
 const filterHave = document.getElementById('filterHave');
 const filterNeed = document.getElementById('filterNeed');
+const filterTime = document.getElementById('filterTime');
 const exchangeCode = document.getElementById('exchangeCode');
 const exchangeList = document.getElementById('exchangeList');
 const countBadge = document.getElementById('countBadge');
+const successRate = document.getElementById('successRate');
 const loadingSpinner = document.getElementById('loadingSpinner');
 const textInput = document.getElementById('textInput');
+const notificationBadge = document.getElementById('notificationBadge');
+const notificationPopup = document.getElementById('notificationPopup');
+const notificationMessage = document.getElementById('notificationMessage');
 
 // Initialize selects
 function populateSelects() {
@@ -62,42 +70,49 @@ function populateSelects() {
     });
 }
 
-// ====== HÀM TRÍCH XUẤT TỰ ĐỘNG ======
+// ====== DARK MODE ======
+function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+    const toggle = document.getElementById('themeToggle');
+    if (document.body.classList.contains('dark-mode')) {
+        toggle.textContent = '☀️';
+        localStorage.setItem('theme', 'dark');
+    } else {
+        toggle.textContent = '🌙';
+        localStorage.setItem('theme', 'light');
+    }
+}
 
-// Tìm mã trong văn bản
+// Load theme from localStorage
+function loadTheme() {
+    const theme = localStorage.getItem('theme');
+    if (theme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('themeToggle').textContent = '☀️';
+    }
+}
+
+// ====== TRÍCH XUẤT TỰ ĐỘNG ======
 function extractCode(text) {
-    // Tìm mã định dạng: --XXXXX--
     let codeMatch = text.match(/--([A-Za-z0-9]+)--/);
     if (codeMatch) return codeMatch[0];
     
-    // // Tìm mã định dạng: [[XXXXX]]
-    // codeMatch = text.match(/\[\[([^\]]+)\]\]/);
-    // if (codeMatch) return codeMatch[1];
-    
-    // // Tìm mã định dạng: {XXXXX}
-    // codeMatch = text.match(/\{([^}]+)\}/);
-    // if (codeMatch) return codeMatch[1];
-    
-    // Tìm bất kỳ chuỗi ký tự đặc biệt nào dài 8-15 ký tự
     codeMatch = text.match(/[A-Za-z0-9]{8,15}/);
     if (codeMatch) return codeMatch[0];
     
     return null;
 }
 
-// Tìm thẻ trong văn bản
 function findCardInText(text, cardId) {
     const keywords = CARD_KEYWORDS[cardId] || [];
     const normalizedText = text.toLowerCase();
     
-    // Kiểm tra từng từ khóa
     for (const keyword of keywords) {
         if (normalizedText.includes(keyword.toLowerCase())) {
             return true;
         }
     }
     
-    // Kiểm tra tên thẻ
     const card = CARDS.find(c => c.id === cardId);
     if (card) {
         if (normalizedText.includes(card.name.toLowerCase())) {
@@ -111,7 +126,6 @@ function findCardInText(text, cardId) {
     return false;
 }
 
-// Trích xuất thông tin từ văn bản
 function extractFromText() {
     const text = textInput.value.trim();
     
@@ -128,15 +142,13 @@ function extractFromText() {
         exchangeCode.value = code;
         showToast(`✅ Đã tìm thấy mã: ${code}`, 'success');
     } else {
-        showToast('⚠️ Không tìm thấy mã trong văn bản. Vui lòng nhập thủ công.', 'warning');
+        showToast('⚠️ Không tìm thấy mã trong văn bản.', 'warning');
     }
     
-    // 2. Tìm thẻ "đổi đi" (thẻ có) và thẻ "cần" (thẻ nhận)
-    // Phân tích cấu trúc câu: "đổi A lấy B" hoặc "đổi A với B" hoặc "A lấy B"
+    // 2. Tìm thẻ
     let haveCardId = null;
     let needCardId = null;
     
-    // Pattern 1: "đổi X lấy Y" hoặc "đổi X với Y"
     const exchangePatterns = [
         /đổi\s+([^,。.!?]+?)\s+(lấy|với)\s+([^,。.!?]+?)(?:\s|$|\.|,|!|\?)/i,
         /muốn\s+đổi\s+([^,。.!?]+?)\s+(lấy|với)\s+([^,。.!?]+?)(?:\s|$|\.|,|!|\?)/i,
@@ -155,15 +167,12 @@ function extractFromText() {
         }
     }
     
-    // Nếu không tìm thấy pattern, thử tìm từ "lấy"
     if (!haveText && !needText) {
         const parts = text.split(/lấy|với/i);
         if (parts.length >= 2) {
-            // Lấy phần trước và sau từ "lấy"
             const before = parts[0].trim();
             const after = parts[1].trim();
             
-            // Tìm tên thẻ trong phần trước và sau
             for (const card of CARDS) {
                 if (before.includes(card.name) || before.includes(card.character)) {
                     haveText = before;
@@ -175,9 +184,7 @@ function extractFromText() {
         }
     }
     
-    // Tìm thẻ dựa trên text đã trích xuất
     if (haveText || needText) {
-        // Tìm thẻ "có" (đổi đi)
         for (const card of CARDS) {
             if (haveText && (haveText.includes(card.name) || haveText.includes(card.character))) {
                 haveCardId = card.id;
@@ -185,7 +192,6 @@ function extractFromText() {
             }
         }
         
-        // Tìm thẻ "cần" (nhận về)
         for (const card of CARDS) {
             if (needText && (needText.includes(card.name) || needText.includes(card.character))) {
                 needCardId = card.id;
@@ -194,9 +200,7 @@ function extractFromText() {
         }
     }
     
-    // Fallback: nếu không tìm thấy qua pattern, thử tìm trực tiếp trong text
     if (!haveCardId || !needCardId) {
-        // Tìm thẻ "có" - thường là thẻ đầu tiên được nhắc đến
         let foundCards = [];
         for (const card of CARDS) {
             if (text.includes(card.name) || text.includes(card.character)) {
@@ -208,28 +212,25 @@ function extractFromText() {
             haveCardId = foundCards[0];
             needCardId = foundCards[1];
         } else if (foundCards.length === 1) {
-            // Nếu chỉ tìm thấy 1 thẻ, giữ nguyên
             if (!haveCardId) haveCardId = foundCards[0];
             if (!needCardId) needCardId = foundCards[0];
         }
     }
     
-    // Cập nhật UI
     if (haveCardId) {
         haveSelect.value = haveCardId;
         showToast(`📤 Tìm thấy thẻ có: ${CARDS.find(c => c.id === haveCardId).name}`, 'success');
     } else {
-        showToast('⚠️ Không tìm thấy thẻ "có" (muốn đổi đi). Vui lòng chọn thủ công.', 'warning');
+        showToast('⚠️ Không tìm thấy thẻ "có".', 'warning');
     }
     
     if (needCardId) {
         needSelect.value = needCardId;
         showToast(`📥 Tìm thấy thẻ cần: ${CARDS.find(c => c.id === needCardId).name}`, 'success');
     } else {
-        showToast('⚠️ Không tìm thấy thẻ "cần" (muốn nhận về). Vui lòng chọn thủ công.', 'warning');
+        showToast('⚠️ Không tìm thấy thẻ "cần".', 'warning');
     }
     
-    // Highlight success
     if (code && haveCardId && needCardId) {
         textInput.classList.add('extract-success');
         setTimeout(() => textInput.classList.remove('extract-success'), 2000);
@@ -239,23 +240,18 @@ function extractFromText() {
     }
 }
 
-// Clear text input
 function clearTextInput() {
     textInput.value = '';
     textInput.classList.remove('extract-success', 'extract-error');
 }
 
-// ====== CÁC HÀM HIỆN CÓ ======
-
-// Show toast notification
+// ====== TOAST ======
 function showToast(message, type = 'info') {
-    const existing = document.querySelector('.toast');
-    if (existing) existing.remove();
-    
+    const container = document.getElementById('toastContainer');
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.textContent = message;
-    document.body.appendChild(toast);
+    container.appendChild(toast);
     
     setTimeout(() => toast.classList.add('show'), 10);
     
@@ -265,7 +261,7 @@ function showToast(message, type = 'info') {
     }, 4000);
 }
 
-// Copy to clipboard
+// ====== COPY ======
 function copyCode(code, element) {
     navigator.clipboard.writeText(code).then(() => {
         const originalText = element.textContent;
@@ -285,7 +281,161 @@ function copyCode(code, element) {
     });
 }
 
-// Format time
+// ====== MARK AS USED ======
+function markAsUsed(exchangeId, button) {
+    if (button.classList.contains('used')) {
+        showToast('Mã này đã được đánh dấu là đã dùng!', 'warning');
+        return;
+    }
+    
+    if (!confirm('Xác nhận đã sử dụng mã này thành công?')) return;
+    
+    db.collection('exchanges').doc(exchangeId).update({
+        isUsed: true,
+        usedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+        showToast('✅ Đã đánh dấu mã đã dùng thành công!', 'success');
+        button.textContent = '✅ Đã dùng';
+        button.classList.add('used');
+        const card = button.closest('.exchange-card');
+        card.classList.add('used');
+        updateSuccessRate();
+    }).catch(error => {
+        showToast('Lỗi: ' + error.message, 'error');
+    });
+}
+
+// ====== SHOW ORIGINAL TEXT ======
+function showOriginalText(originalText) {
+    if (!originalText) {
+        showToast('Không có văn bản gốc để hiển thị!', 'warning');
+        return;
+    }
+    
+    const popup = document.createElement('div');
+    popup.className = 'original-text-popup';
+    popup.innerHTML = `
+        <div class="original-text-content">
+            <h3>📝 Văn bản gốc</h3>
+            <pre id="originalTextContent">${originalText}</pre>
+            <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="copyOriginalText()" style="flex: 1;">
+                    📋 Copy văn bản
+                </button>
+                <button class="btn btn-outline" onclick="this.closest('.original-text-popup').remove()" style="flex: 1;">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(popup);
+    
+    popup.addEventListener('click', (e) => {
+        if (e.target === popup) popup.remove();
+    });
+}
+
+// Hàm copy văn bản gốc
+function copyOriginalText() {
+    const textElement = document.getElementById('originalTextContent');
+    if (!textElement) return;
+    
+    const text = textElement.textContent;
+    
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('✅ Đã copy văn bản gốc!', 'success');
+        // Đổi text nút tạm thời
+        const btn = document.querySelector('.original-text-popup .btn-primary');
+        if (btn) {
+            const originalText = btn.textContent;
+            btn.textContent = '✅ Đã copy!';
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 2000);
+        }
+    }).catch(() => {
+        // Fallback method
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        textarea.remove();
+        showToast('✅ Đã copy văn bản gốc!', 'success');
+    });
+}
+
+// ====== NOTIFICATIONS ======
+function toggleNotifications() {
+    notificationEnabled = !notificationEnabled;
+    if (notificationEnabled) {
+        showToast('🔔 Đã bật thông báo', 'success');
+        document.getElementById('notificationBell').style.opacity = '1';
+    } else {
+        showToast('🔕 Đã tắt thông báo', 'warning');
+        document.getElementById('notificationBell').style.opacity = '0.5';
+    }
+}
+
+function showNotification(exchange) {
+    if (!notificationEnabled) return;
+    
+    const haveCard = CARDS.find(c => c.id === exchange.haveCardId);
+    const needCard = CARDS.find(c => c.id === exchange.needCardId);
+    
+    const message = `📤 ${haveCard ? haveCard.name : 'Không rõ'} ➜ 📥 ${needCard ? needCard.name : 'Không rõ'}\nMã: ${exchange.code}`;
+    
+    notificationMessage.innerHTML = `
+        <div style="margin-bottom: 10px;">${message}</div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-secondary" onclick="copyCode('${exchange.code}', this)" style="padding: 6px 12px; font-size: 12px; width: auto;">
+                📋 Copy mã
+            </button>
+            <button class="btn btn-outline" onclick="closeNotificationPopup()" style="padding: 6px 12px; font-size: 12px; width: auto;">
+                Đóng
+            </button>
+        </div>
+    `;
+    
+    notificationPopup.style.display = 'block';
+    unreadCount++;
+    updateBadge();
+    
+    // Auto hide after 10 seconds
+    setTimeout(() => {
+        closeNotificationPopup();
+    }, 10000);
+}
+
+function closeNotificationPopup() {
+    notificationPopup.style.display = 'none';
+    unreadCount = 0;
+    updateBadge();
+}
+
+function updateBadge() {
+    if (unreadCount > 0) {
+        notificationBadge.style.display = 'inline';
+        notificationBadge.textContent = unreadCount;
+    } else {
+        notificationBadge.style.display = 'none';
+    }
+}
+
+// ====== UPDATE SUCCESS RATE ======
+function updateSuccessRate() {
+    const total = allExchanges.length;
+    if (total === 0) {
+        successRate.textContent = '📊 Tỷ lệ thành công: 0%';
+        return;
+    }
+    
+    const used = allExchanges.filter(item => item.isUsed).length;
+    const rate = Math.round((used / total) * 100);
+    successRate.textContent = `📊 Tỷ lệ thành công: ${rate}% (${used}/${total})`;
+}
+
+// ====== FORMAT TIME ======
 function formatTime(timestamp) {
     if (!timestamp) return 'Vừa xong';
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -298,7 +448,37 @@ function formatTime(timestamp) {
     return date.toLocaleDateString('vi-VN');
 }
 
-// Render exchanges
+// ====== FILTER BY TIME ======
+function filterByTime(exchanges, timeFilter) {
+    if (timeFilter === 'all') return exchanges;
+    
+    const now = new Date();
+    let cutoff = new Date();
+    
+    switch(timeFilter) {
+        case '1h':
+            cutoff.setHours(now.getHours() - 1);
+            break;
+        case '24h':
+            cutoff.setDate(now.getDate() - 1);
+            break;
+        case '7d':
+            cutoff.setDate(now.getDate() - 7);
+            break;
+        case '30d':
+            cutoff.setDate(now.getDate() - 30);
+            break;
+        default:
+            return exchanges;
+    }
+    
+    return exchanges.filter(item => {
+        const createdAt = item.createdAt?.toDate?.() || new Date(item.createdAt);
+        return createdAt >= cutoff;
+    });
+}
+
+// ====== RENDER EXCHANGES ======
 function renderExchanges(exchanges) {
     if (!exchanges || exchanges.length === 0) {
         exchangeList.innerHTML = `
@@ -309,6 +489,7 @@ function renderExchanges(exchanges) {
             </div>
         `;
         countBadge.textContent = '0 mã';
+        updateSuccessRate();
         return;
     }
     
@@ -322,18 +503,25 @@ function renderExchanges(exchanges) {
     sorted.forEach(item => {
         const haveCard = CARDS.find(c => c.id === item.haveCardId);
         const needCard = CARDS.find(c => c.id === item.needCardId);
+        const isUsed = item.isUsed || false;
         
         html += `
-            <div class="exchange-card">
+            <div class="exchange-card ${isUsed ? 'used' : ''}">
                 <div class="card-info">
                     <span class="card-badge have">📤 ${haveCard ? haveCard.name : 'Không rõ'}</span>
                     <span class="card-arrow">➜</span>
                     <span class="card-badge need">📥 ${needCard ? needCard.name : 'Không rõ'}</span>
                     <span class="card-code">${item.code}</span>
                 </div>
-                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <div class="card-actions">
                     <span class="card-time">⏱️ ${formatTime(item.createdAt)}</span>
                     <button class="copy-btn" onclick="copyCode('${item.code}', this)">📋 Copy mã</button>
+                    <button class="used-btn ${isUsed ? 'used' : ''}" onclick="markAsUsed('${item.id}', this)" ${isUsed ? 'disabled' : ''}>
+                        ${isUsed ? '✅ Đã dùng' : '✅ Dùng rồi?'}
+                    </button>
+                    <button class="original-btn" onclick="showOriginalText('${(item.originalText || '').replace(/'/g, "\\'")}')">
+                        📝 Xem gốc
+                    </button>
                 </div>
             </div>
         `;
@@ -341,10 +529,11 @@ function renderExchanges(exchanges) {
     
     exchangeList.innerHTML = html;
     countBadge.textContent = `${sorted.length} mã`;
+    updateSuccessRate();
 }
 
-// Load exchanges
-function loadExchanges(haveCardId = '', needCardId = '') {
+// ====== LOAD EXCHANGES ======
+function loadExchanges(haveCardId = '', needCardId = '', timeFilter = 'all') {
     loadingSpinner.style.display = 'block';
     exchangeList.innerHTML = '';
     
@@ -371,8 +560,10 @@ function loadExchanges(haveCardId = '', needCardId = '') {
             });
         });
         
-        allExchanges = exchanges;
-        renderExchanges(exchanges);
+        // Apply time filter
+        const filtered = filterByTime(exchanges, timeFilter);
+        allExchanges = filtered;
+        renderExchanges(filtered);
     }).catch(error => {
         loadingSpinner.style.display = 'none';
         console.error('Error loading exchanges:', error);
@@ -385,12 +576,6 @@ function loadExchanges(haveCardId = '', needCardId = '') {
                     <p>Không thể kết nối đến cơ sở dữ liệu</p>
                     <p style="font-size: 14px; margin-top: 8px; color: #C62828;">
                         Lỗi: Missing or insufficient permissions
-                    </p>
-                    <p style="font-size: 13px; margin-top: 12px; background: #FFF3E0; padding: 12px; border-radius: 8px;">
-                        💡 Hướng dẫn sửa lỗi:<br>
-                        1. Vào Firebase Console → Firestore → Rules<br>
-                        2. Thay rules bằng: allow read, write: if true;<br>
-                        3. Nhấn Publish
                     </p>
                 </div>
             `;
@@ -412,19 +597,21 @@ function loadExchanges(haveCardId = '', needCardId = '') {
                 filtered = filtered.filter(item => item.needCardId === parseInt(needCardId));
             }
             
-            allExchanges = filtered;
-            renderExchanges(filtered);
+            const timeFiltered = filterByTime(filtered, timeFilter);
+            allExchanges = timeFiltered;
+            renderExchanges(timeFiltered);
         }).catch(() => {
             showToast('Không thể tải dữ liệu. Vui lòng thử lại sau.', 'error');
         });
     });
 }
 
-// Post exchange
+// ====== POST EXCHANGE ======
 function postExchange() {
     const haveCardId = parseInt(haveSelect.value);
     const needCardId = parseInt(needSelect.value);
     const code = exchangeCode.value.trim();
+    const originalText = textInput.value.trim();
     
     if (!haveCardId || !needCardId) {
         showToast('Vui lòng chọn cả 2 loại thẻ!', 'error');
@@ -457,6 +644,8 @@ function postExchange() {
             haveCardId: haveCardId,
             needCardId: needCardId,
             code: code,
+            originalText: originalText || null,
+            isUsed: false,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         
@@ -467,7 +656,7 @@ function postExchange() {
             needSelect.value = '';
             textInput.value = '';
             textInput.classList.remove('extract-success', 'extract-error');
-            loadExchanges(currentFilter.have, currentFilter.need);
+            loadExchanges(currentFilter.have, currentFilter.need, currentFilter.time);
         }).catch(error => {
             showToast('Lỗi: ' + error.message, 'error');
         });
@@ -476,6 +665,8 @@ function postExchange() {
             haveCardId: haveCardId,
             needCardId: needCardId,
             code: code,
+            originalText: originalText || null,
+            isUsed: false,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         
@@ -486,51 +677,73 @@ function postExchange() {
             needSelect.value = '';
             textInput.value = '';
             textInput.classList.remove('extract-success', 'extract-error');
-            loadExchanges(currentFilter.have, currentFilter.need);
+            loadExchanges(currentFilter.have, currentFilter.need, currentFilter.time);
         }).catch(error => {
             showToast('Lỗi: ' + error.message, 'error');
         });
     });
 }
 
-// Apply filter
+// ====== APPLY FILTER ======
 function applyFilter() {
     const have = filterHave.value;
     const need = filterNeed.value;
-    currentFilter = { have, need };
-    loadExchanges(have, need);
+    const time = filterTime.value;
+    currentFilter = { have, need, time };
+    loadExchanges(have, need, time);
 }
 
-// Reset filter
 function resetFilter() {
     filterHave.value = '';
     filterNeed.value = '';
-    currentFilter = { have: '', need: '' };
-    loadExchanges('', '');
+    filterTime.value = 'all';
+    currentFilter = { have: '', need: '', time: 'all' };
+    loadExchanges('', '', 'all');
 }
 
-// Realtime listener
+// ====== REALTIME LISTENER ======
 function setupRealtimeListener() {
-    let query = exchangesRef.orderBy('createdAt', 'desc').limit(120);
+    let query = exchangesRef.orderBy('createdAt', 'desc').limit(50);
     
     query.onSnapshot(snapshot => {
-        if (!currentFilter.have && !currentFilter.need) {
+        if (!currentFilter.have && !currentFilter.need && currentFilter.time === 'all') {
             const exchanges = [];
-            snapshot.forEach(doc => {
-                exchanges.push({ id: doc.id, ...doc.data() });
+            let newExchanges = [];
+            
+            snapshot.docChanges().forEach(change => {
+                const data = { id: change.doc.id, ...change.doc.data() };
+                if (change.type === 'added') {
+                    newExchanges.push(data);
+                }
+                exchanges.push(data);
             });
+            
             allExchanges = exchanges;
             renderExchanges(exchanges);
+            
+            // Show notification for new exchanges
+            if (newExchanges.length > 0 && lastNotificationTime) {
+                const latest = newExchanges[0];
+                const createdAt = latest.createdAt?.toDate?.() || new Date(latest.createdAt);
+                if (createdAt > lastNotificationTime) {
+                    showNotification(latest);
+                }
+            }
+            
+            if (newExchanges.length > 0) {
+                lastNotificationTime = new Date();
+            }
         }
     }, error => {
         console.warn('Realtime listener error:', error);
     });
 }
 
-// Initialize
+// ====== INITIALIZE ======
 function init() {
     populateSelects();
-    loadExchanges('', '');
+    loadTheme();
+    loadExchanges('', '', 'all');
     setupRealtimeListener();
     
     exchangeCode.addEventListener('keypress', (e) => {
@@ -539,7 +752,6 @@ function init() {
         }
     });
     
-    // Auto extract on paste
     textInput.addEventListener('paste', function(e) {
         setTimeout(() => {
             if (this.value.trim()) {
