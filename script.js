@@ -70,13 +70,13 @@ function extractCode(text) {
     let codeMatch = text.match(/--([A-Za-z0-9]+)--/);
     if (codeMatch) return codeMatch[0];
     
-    // Tìm mã định dạng: [[XXXXX]]
-    codeMatch = text.match(/\[\[([^\]]+)\]\]/);
-    if (codeMatch) return codeMatch[1];
+    // // Tìm mã định dạng: [[XXXXX]]
+    // codeMatch = text.match(/\[\[([^\]]+)\]\]/);
+    // if (codeMatch) return codeMatch[1];
     
-    // Tìm mã định dạng: {XXXXX}
-    codeMatch = text.match(/\{([^}]+)\}/);
-    if (codeMatch) return codeMatch[1];
+    // // Tìm mã định dạng: {XXXXX}
+    // codeMatch = text.match(/\{([^}]+)\}/);
+    // if (codeMatch) return codeMatch[1];
     
     // Tìm bất kỳ chuỗi ký tự đặc biệt nào dài 8-15 ký tự
     codeMatch = text.match(/[A-Za-z0-9]{8,15}/);
