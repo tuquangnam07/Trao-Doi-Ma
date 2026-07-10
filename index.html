@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trao Đổi Thẻ Liên Quân - Sưu Tầm Là Trúng</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">🎴</span>
+                <h1>Trao Đổi Thẻ</h1>
+            </div>
+            <div class="header-info">
+                <span>Sự kiện: 08/07 - 09/08/2026</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Form đăng tải mã -->
+            <section class="section post-section">
+                <h2>📤 Đăng tải mã trao đổi</h2>
+                <div class="post-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Thẻ tôi có (muốn đổi đi)</label>
+                            <select id="haveCard">
+                                <option value="">-- Chọn thẻ --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Thẻ tôi cần (muốn nhận về)</label>
+                            <select id="needCard">
+                                <option value="">-- Chọn thẻ --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label>Mã trao đổi (từ game)</label>
+                            <input type="text" id="exchangeCode" placeholder="Ví dụ: --LF8Qm4tX98--" maxlength="50">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="postExchange()">Đăng tải mã</button>
+                </div>
+            </section>
+
+            <!-- Bộ lọc -->
+            <section class="section filter-section">
+                <h2>🔍 Tìm mã trao đổi</h2>
+                <div class="filter-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Lọc theo thẻ tôi có</label>
+                            <select id="filterHave">
+                                <option value="">Tất cả</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Lọc theo thẻ tôi cần</label>
+                            <select id="filterNeed">
+                                <option value="">Tất cả</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="applyFilter()">Áp dụng bộ lọc</button>
+                    <button class="btn btn-outline" onclick="resetFilter()">Xóa bộ lọc</button>
+                </div>
+            </section>
+
+            <!-- Danh sách mã -->
+            <section class="section list-section">
+                <div class="list-header">
+                    <h2>📋 Danh sách mã trao đổi</h2>
+                    <span class="count-badge" id="countBadge">0 mã</span>
+                </div>
+                <div id="exchangeList" class="exchange-list">
+                    <!-- Cards sẽ được render ở đây -->
+                </div>
+                <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Đang tải...</p>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>© 2026 - Cộng đồng trao đổi thẻ Liên Quân Mobile</p>
+            <p class="note">* Lưu ý: Mỗi ngày chỉ tạo tối đa 1 mã trao đổi trong game</p>
+        </footer>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <script src="firebase-config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
