@@ -26,6 +26,7 @@
             <section class="section post-section">
                 <h2>📤 Đăng tải mã trao đổi</h2>
                 <div class="post-form">
+                    <!-- Cách 1: Chọn thẻ thủ công -->
                     <div class="form-row">
                         <div class="form-group">
                             <label>Thẻ tôi có (muốn đổi đi)</label>
@@ -40,12 +41,34 @@
                             </select>
                         </div>
                     </div>
+                    
+                    <!-- Cách 2: Nhập văn bản tự động -->
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label>Hoặc dán văn bản trao đổi (tự động trích xuất)</label>
+                            <textarea id="textInput" rows="3" placeholder="Dán văn bản trao đổi từ game vào đây..."></textarea>
+                            <div style="display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap;">
+                                <button class="btn btn-secondary" onclick="extractFromText()" style="padding: 8px 20px; width: auto;">
+                                    🔍 Trích xuất tự động
+                                </button>
+                                <button class="btn btn-outline" onclick="clearTextInput()" style="padding: 8px 20px; width: auto;">
+                                    Xóa
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Mã trao đổi -->
                     <div class="form-row">
                         <div class="form-group full-width">
                             <label>Mã trao đổi (từ game)</label>
                             <input type="text" id="exchangeCode" placeholder="Ví dụ: --LF8Qm4tX98--" maxlength="50">
+                            <div style="font-size: 12px; color: var(--gray); margin-top: 4px;">
+                                💡 Mã thường có định dạng: <strong>--XXXXX--</strong> hoặc <strong>[[XXXXX]]</strong>
+                            </div>
                         </div>
                     </div>
+                    
                     <button class="btn btn-primary" onclick="postExchange()">Đăng tải mã</button>
                 </div>
             </section>
