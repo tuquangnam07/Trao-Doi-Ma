@@ -184,5 +184,28 @@
     <script>
         document.getElementById('exchangeCode').disabled = true;
     </script>
+
+    <script>
+    // Chặn chọn thẻ thủ công - buộc phải dùng trích xuất tự động
+    document.getElementById('haveCard').disabled = true;
+    document.getElementById('needCard').disabled = true;
+    
+    // Thêm placeholder hướng dẫn
+    const haveCard = document.getElementById('haveCard');
+    const needCard = document.getElementById('needCard');
+    
+    // Thêm option placeholder
+    haveCard.innerHTML = '<option value="">📤 Dùng trích xuất tự động bên dưới</option>';
+    needCard.innerHTML = '<option value="">📥 Dùng trích xuất tự động bên dưới</option>';
+    
+    // Style cho disabled
+    haveCard.style.backgroundColor = '#f0f0f0';
+    haveCard.style.color = '#999';
+    haveCard.style.cursor = 'not-allowed';
+    
+    needCard.style.backgroundColor = '#f0f0f0';
+    needCard.style.color = '#999';
+    needCard.style.cursor = 'not-allowed';
+</script>
 </body>
 </html>
