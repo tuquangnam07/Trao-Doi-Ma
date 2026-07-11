@@ -107,6 +107,14 @@
                                 <option value="30d">30 ngày qua</option>
                             </select>
                         </div>
+                        <div class="form-group">
+    <label>Lọc theo trạng thái</label>
+    <select id="filterStatus">
+        <option value="all">Tất cả</option>
+        <option value="unused">Chưa dùng</option>
+        <option value="used">Đã dùng</option>
+    </select>
+</div>
                     </div>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                         <button class="btn btn-secondary" onclick="applyFilter()">Áp dụng bộ lọc</button>
@@ -127,6 +135,16 @@
                 <div id="exchangeList" class="exchange-list">
                     <!-- Cards sẽ được render ở đây -->
                 </div>
+                <!-- Pagination -->
+<div id="loadMoreContainer" style="display: none; margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 15px; flex-wrap: wrap;">
+    <button class="btn btn-outline" id="prevPageBtn" onclick="prevPage()" style="display: none;">
+        ⬅️ Trang trước
+    </button>
+    <span id="pageInfo" style="color: var(--gray); font-weight: 500;">Trang 1</span>
+    <button class="btn btn-outline" id="nextPageBtn" onclick="nextPage()" style="display: none;">
+        Trang sau ➡️
+    </button>
+</div>
                 <div id="loadingSpinner" class="loading-spinner" style="display: none;">
                     <div class="spinner"></div>
                     <p>Đang tải...</p>
@@ -137,7 +155,9 @@
         <!-- Footer -->
         <footer class="footer">
             <p>© 2026 - Cộng đồng trao đổi thẻ Liên Quân Mobile</p>
-            <p class="note">* Lưu ý: Mỗi ngày chỉ tạo tối đa 1 mã trao đổi trong game</p>
+            <p style="margin-top: 4px; font-size: 12px;">
+                Built with ❤️ by <a href="https://facebook.com/tuquangnam07" target="_blank">tuquangnam07</a> | Powered by Từ Quang Nam | 
+            </p>
         </footer>
     </div>
 
