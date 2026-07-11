@@ -30,11 +30,14 @@ const CARD_KEYWORDS = {
 const exchangesRef = db.collection('exchanges');
 
 // State
-let currentFilter = { have: '', need: '', time: 'all' };
+let currentFilter = { have: '', need: '', time: 'all', status: 'all' };
 let allExchanges = [];
 let unreadCount = 0;
 let lastNotificationTime = null;
 let notificationEnabled = true;
+let currentPage = 1;
+const pageSize = 20;
+let totalExchanges = 0;
 
 // DOM Elements
 const haveSelect = document.getElementById('haveCard');
@@ -42,6 +45,7 @@ const needSelect = document.getElementById('needCard');
 const filterHave = document.getElementById('filterHave');
 const filterNeed = document.getElementById('filterNeed');
 const filterTime = document.getElementById('filterTime');
+const filterStatus = document.getElementById('filterStatus');
 const exchangeCode = document.getElementById('exchangeCode');
 const exchangeList = document.getElementById('exchangeList');
 const countBadge = document.getElementById('countBadge');
@@ -51,6 +55,8 @@ const textInput = document.getElementById('textInput');
 const notificationBadge = document.getElementById('notificationBadge');
 const notificationPopup = document.getElementById('notificationPopup');
 const notificationMessage = document.getElementById('notificationMessage');
+const loadMoreBtn = document.getElementById('loadMoreBtn');
+const pageInfo = document.getElementById('pageInfo');
 
 // Initialize selects
 function populateSelects() {
@@ -92,27 +98,46 @@ function loadTheme() {
     }
 }
 
-// ====== TRÍCH XUẤT TỰ ĐỘNG ======
+// ====== TRÍCH XUẤT TỰ ĐỘNG (SỬA LỖI NHẬN DIỆN MÃ) ======
 function extractCode(text) {
-    // Tìm mã định dạng: --XXXXX-- (có thể chứa _, -, chữ và số)
-    let codeMatch = text.match(/--([A-Za-z0-9_\-]+)--/);
-    if (codeMatch) return codeMatch[1]; // Trả về phần bên trong, không bao gồm --
+    // Ưu tiên tìm mã trong dấu -- hoặc [[
+    let codeMatch = text.match(/--([A-Za-z0-9_\-@#$%^&*]+)--/);
+    if (codeMatch) {
+        console.log('Found code with --:', codeMatch[1]);
+        return codeMatch[1];
+    }
     
-    // Tìm mã định dạng: [[XXXXX]] (có thể chứa _, -, chữ và số)
-    codeMatch = text.match(/\[\[([A-Za-z0-9_\-]+)\]\]/);
-    if (codeMatch) return codeMatch[1];
+    codeMatch = text.match(/\[\[([A-Za-z0-9_\-@#$%^&*]+)\]\]/);
+    if (codeMatch) {
+        console.log('Found code with [[]]:', codeMatch[1]);
+        return codeMatch[1];
+    }
     
-    // Tìm mã định dạng: {XXXXX} (có thể chứa _, -, chữ và số)
-    codeMatch = text.match(/\{([A-Za-z0-9_\-]+)\}/);
-    if (codeMatch) return codeMatch[1];
+    codeMatch = text.match(/\{([A-Za-z0-9_\-@#$%^&*]+)\}/);
+    if (codeMatch) {
+        console.log('Found code with {}:', codeMatch[1]);
+        return codeMatch[1];
+    }
     
-    // Tìm mã định dạng: *XXXXX* (có thể chứa _, -, chữ và số)
-    codeMatch = text.match(/\*([A-Za-z0-9_\-]+)\*/);
-    if (codeMatch) return codeMatch[1];
+    codeMatch = text.match(/\*([A-Za-z0-9_\-@#$%^&*]+)\*/);
+    if (codeMatch) {
+        console.log('Found code with *:', codeMatch[1]);
+        return codeMatch[1];
+    }
     
-    // Tìm bất kỳ chuỗi ký tự nào có thể là mã (có chứa _, -, chữ và số, dài 8-20 ký tự)
-    codeMatch = text.match(/[A-Za-z0-9_\-]{8,20}/);
-    if (codeMatch) return codeMatch[0];
+    // Tìm từ khóa "Mã đổi:" hoặc "mã:" theo sau là code
+    const codeKeywordMatch = text.match(/(?:Mã đổi|mã|Mã)[\s:]+([A-Za-z0-9_\-@#$%^&*]{6,30})/i);
+    if (codeKeywordMatch) {
+        console.log('Found code after "Mã đổi:":', codeKeywordMatch[1]);
+        return codeKeywordMatch[1];
+    }
+    
+    // Tìm bất kỳ chuỗi ký tự nào có thể là mã (dài 6-30 ký tự, chứa ký tự đặc biệt)
+    codeMatch = text.match(/[A-Za-z0-9_\-@#$%^&*]{6,30}/);
+    if (codeMatch) {
+        console.log('Found code with regex:', codeMatch[0]);
+        return codeMatch[0];
+    }
     
     return null;
 }
@@ -324,6 +349,8 @@ function markAsUsed(exchangeId, button) {
         const card = button.closest('.exchange-card');
         card.classList.add('used');
         updateSuccessRate();
+        // Reload to update list
+        loadExchanges(currentFilter.have, currentFilter.need, currentFilter.time, currentFilter.status, currentPage);
     }).catch(error => {
         showToast('Lỗi: ' + error.message, 'error');
     });
@@ -368,7 +395,6 @@ function copyOriginalText() {
     
     navigator.clipboard.writeText(text).then(() => {
         showToast('✅ Đã copy văn bản gốc!', 'success');
-        // Đổi text nút tạm thời
         const btn = document.querySelector('.original-text-popup .btn-primary');
         if (btn) {
             const originalText = btn.textContent;
@@ -378,7 +404,6 @@ function copyOriginalText() {
             }, 2000);
         }
     }).catch(() => {
-        // Fallback method
         const textarea = document.createElement('textarea');
         textarea.value = text;
         document.body.appendChild(textarea);
@@ -425,7 +450,6 @@ function showNotification(exchange) {
     unreadCount++;
     updateBadge();
     
-    // Auto hide after 10 seconds
     setTimeout(() => {
         closeNotificationPopup();
     }, 10000);
@@ -502,8 +526,16 @@ function filterByTime(exchanges, timeFilter) {
     });
 }
 
+// ====== FILTER BY STATUS ======
+function filterByStatus(exchanges, statusFilter) {
+    if (statusFilter === 'all') return exchanges;
+    if (statusFilter === 'used') return exchanges.filter(item => item.isUsed === true);
+    if (statusFilter === 'unused') return exchanges.filter(item => item.isUsed !== true);
+    return exchanges;
+}
+
 // ====== RENDER EXCHANGES ======
-function renderExchanges(exchanges) {
+function renderExchanges(exchanges, page = 1) {
     if (!exchanges || exchanges.length === 0) {
         exchangeList.innerHTML = `
             <div class="empty-state">
@@ -513,22 +545,30 @@ function renderExchanges(exchanges) {
             </div>
         `;
         countBadge.textContent = '0 mã';
+        document.getElementById('loadMoreContainer').style.display = 'none';
         updateSuccessRate();
         return;
     }
     
+    // Sort by createdAt (newest first)
     const sorted = [...exchanges].sort((a, b) => {
         const timeA = a.createdAt?.toDate?.() || new Date(a.createdAt);
         const timeB = b.createdAt?.toDate?.() || new Date(b.createdAt);
         return timeB - timeA;
     });
     
+    totalExchanges = sorted.length;
+    
+    // Calculate pagination
+    const start = (page - 1) * pageSize;
+    const end = Math.min(start + pageSize, totalExchanges);
+    const pageData = sorted.slice(start, end);
+    
     let html = '';
-    sorted.forEach(item => {
+    pageData.forEach(item => {
         const haveCard = CARDS.find(c => c.id === item.haveCardId);
         const needCard = CARDS.find(c => c.id === item.needCardId);
         const isUsed = item.isUsed || false;
-        // Hiển thị mã với định dạng --XXXX-- để dễ nhận biết
         const displayCode = item.code.length > 0 ? `--${item.code}--` : item.code;
         
         html += `
@@ -554,12 +594,20 @@ function renderExchanges(exchanges) {
     });
     
     exchangeList.innerHTML = html;
-    countBadge.textContent = `${sorted.length} mã`;
+    countBadge.textContent = `${totalExchanges} mã`;
+    
+    // Update pagination
+    const totalPages = Math.ceil(totalExchanges / pageSize);
+    document.getElementById('pageInfo').textContent = `Trang ${page}/${totalPages}`;
+    document.getElementById('prevPageBtn').style.display = page > 1 ? 'inline-flex' : 'none';
+    document.getElementById('nextPageBtn').style.display = page < totalPages ? 'inline-flex' : 'none';
+    document.getElementById('loadMoreContainer').style.display = totalExchanges > pageSize ? 'flex' : 'none';
+    
     updateSuccessRate();
 }
 
 // ====== LOAD EXCHANGES ======
-function loadExchanges(haveCardId = '', needCardId = '', timeFilter = 'all') {
+function loadExchanges(haveCardId = '', needCardId = '', timeFilter = 'all', statusFilter = 'all', page = 1) {
     loadingSpinner.style.display = 'block';
     exchangeList.innerHTML = '';
     
@@ -587,9 +635,12 @@ function loadExchanges(haveCardId = '', needCardId = '', timeFilter = 'all') {
         });
         
         // Apply time filter
-        const filtered = filterByTime(exchanges, timeFilter);
+        let filtered = filterByTime(exchanges, timeFilter);
+        // Apply status filter
+        filtered = filterByStatus(filtered, statusFilter);
+        
         allExchanges = filtered;
-        renderExchanges(filtered);
+        renderExchanges(filtered, page);
     }).catch(error => {
         loadingSpinner.style.display = 'none';
         console.error('Error loading exchanges:', error);
@@ -623,9 +674,11 @@ function loadExchanges(haveCardId = '', needCardId = '', timeFilter = 'all') {
                 filtered = filtered.filter(item => item.needCardId === parseInt(needCardId));
             }
             
-            const timeFiltered = filterByTime(filtered, timeFilter);
-            allExchanges = timeFiltered;
-            renderExchanges(timeFiltered);
+            filtered = filterByTime(filtered, timeFilter);
+            filtered = filterByStatus(filtered, statusFilter);
+            
+            allExchanges = filtered;
+            renderExchanges(filtered, page);
         }).catch(() => {
             showToast('Không thể tải dữ liệu. Vui lòng thử lại sau.', 'error');
         });
@@ -696,7 +749,8 @@ function postExchange() {
             needSelect.value = '';
             textInput.value = '';
             textInput.classList.remove('extract-success', 'extract-error');
-            loadExchanges(currentFilter.have, currentFilter.need, currentFilter.time);
+            currentPage = 1;
+            loadExchanges(currentFilter.have, currentFilter.need, currentFilter.time, currentFilter.status, currentPage);
         }).catch(error => {
             showToast('Lỗi: ' + error.message, 'error');
         });
@@ -717,11 +771,33 @@ function postExchange() {
             needSelect.value = '';
             textInput.value = '';
             textInput.classList.remove('extract-success', 'extract-error');
-            loadExchanges(currentFilter.have, currentFilter.need, currentFilter.time);
+            currentPage = 1;
+            loadExchanges(currentFilter.have, currentFilter.need, currentFilter.time, currentFilter.status, currentPage);
         }).catch(error => {
             showToast('Lỗi: ' + error.message, 'error');
         });
     });
+}
+
+// ====== PAGINATION ======
+function goToPage(page) {
+    currentPage = page;
+    loadExchanges(currentFilter.have, currentFilter.need, currentFilter.time, currentFilter.status, currentPage);
+    // Scroll to top of list
+    document.querySelector('.list-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function prevPage() {
+    if (currentPage > 1) {
+        goToPage(currentPage - 1);
+    }
+}
+
+function nextPage() {
+    const totalPages = Math.ceil(totalExchanges / pageSize);
+    if (currentPage < totalPages) {
+        goToPage(currentPage + 1);
+    }
 }
 
 // ====== APPLY FILTER ======
@@ -729,24 +805,29 @@ function applyFilter() {
     const have = filterHave.value;
     const need = filterNeed.value;
     const time = filterTime.value;
-    currentFilter = { have, need, time };
-    loadExchanges(have, need, time);
+    const status = filterStatus ? filterStatus.value : 'all';
+    currentFilter = { have, need, time, status };
+    currentPage = 1;
+    loadExchanges(have, need, time, status, currentPage);
 }
 
 function resetFilter() {
     filterHave.value = '';
     filterNeed.value = '';
     filterTime.value = 'all';
-    currentFilter = { have: '', need: '', time: 'all' };
-    loadExchanges('', '', 'all');
+    if (filterStatus) filterStatus.value = 'all';
+    currentFilter = { have: '', need: '', time: 'all', status: 'all' };
+    currentPage = 1;
+    loadExchanges('', '', 'all', 'all', currentPage);
 }
 
 // ====== REALTIME LISTENER ======
 function setupRealtimeListener() {
-    let query = exchangesRef.orderBy('createdAt', 'desc').limit(150);
+    let query = exchangesRef.orderBy('createdAt', 'desc');
     
     query.onSnapshot(snapshot => {
-        if (!currentFilter.have && !currentFilter.need && currentFilter.time === 'all') {
+        // Only update if no filters are applied
+        if (!currentFilter.have && !currentFilter.need && currentFilter.time === 'all' && currentFilter.status === 'all') {
             const exchanges = [];
             let newExchanges = [];
             
@@ -759,7 +840,7 @@ function setupRealtimeListener() {
             });
             
             allExchanges = exchanges;
-            renderExchanges(exchanges);
+            renderExchanges(exchanges, currentPage);
             
             // Show notification for new exchanges
             if (newExchanges.length > 0 && lastNotificationTime) {
@@ -783,7 +864,7 @@ function setupRealtimeListener() {
 function init() {
     populateSelects();
     loadTheme();
-    loadExchanges('', '', 'all');
+    loadExchanges('', '', 'all', 'all', 1);
     setupRealtimeListener();
     
     exchangeCode.addEventListener('keypress', (e) => {
