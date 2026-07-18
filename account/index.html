@@ -4,9 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Quản lý tài khoản Liên Quân</title>
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
@@ -40,7 +38,6 @@
             overflow-x: hidden;
         }
 
-        /* ===== HEADER ===== */
         .app-header {
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             border-radius: 16px;
@@ -95,7 +92,6 @@
         .stat-inactive { color: var(--red); }
         .stat-starred { color: var(--gold); }
 
-        /* ===== SEARCH BAR ===== */
         .search-section {
             display: flex;
             gap: 8px;
@@ -140,17 +136,10 @@
             white-space: nowrap;
         }
 
-        .search-section .filter-btn.active {
-            border-color: var(--gold);
-            color: var(--gold);
-            background: rgba(255,215,0,0.1);
-        }
-
         .search-section .filter-btn:active {
             transform: scale(0.95);
         }
 
-        /* ===== FILTER TABS ===== */
         .filter-tabs {
             display: flex;
             gap: 6px;
@@ -200,7 +189,6 @@
             background: rgba(255,215,0,0.2);
         }
 
-        /* ===== TOOLBAR ===== */
         .toolbar {
             display: flex;
             gap: 6px;
@@ -257,7 +245,6 @@
             display: none;
         }
 
-        /* ===== ACCOUNT LIST ===== */
         .list-container {
             border-radius: 12px;
             background: rgba(0,0,0,0.2);
@@ -398,10 +385,6 @@
             color: var(--gold);
         }
 
-        .account-item .actions .btn-icon.star {
-            font-size: 0.8rem;
-        }
-
         .account-item .actions .btn-icon.star.active {
             color: var(--gold);
         }
@@ -450,7 +433,6 @@
             border-color: rgba(231, 76, 60, 0.2);
         }
 
-        /* ===== PAGINATION ===== */
         .pagination {
             display: flex;
             justify-content: center;
@@ -494,7 +476,6 @@
             padding: 0 6px;
         }
 
-        /* ===== EMPTY STATE ===== */
         .empty-state {
             text-align: center;
             padding: 40px 20px;
@@ -512,7 +493,6 @@
             font-size: 0.85rem;
         }
 
-        /* ===== TOAST ===== */
         .toast {
             position: fixed;
             bottom: 70px;
@@ -543,7 +523,6 @@
         .toast.error { border-color: var(--red); }
         .toast.warning { border-color: var(--gold); }
 
-        /* ===== LOADING ===== */
         .loading-spinner {
             display: flex;
             justify-content: center;
@@ -563,7 +542,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* ===== BOTTOM NAV ===== */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -593,6 +571,7 @@
             cursor: pointer;
             transition: 0.3s;
             min-width: 50px;
+            position: relative;
         }
 
         .bottom-nav .nav-item i {
@@ -607,18 +586,6 @@
             transform: scale(0.9);
         }
 
-        .bottom-nav .nav-item .nav-badge {
-            background: var(--red);
-            color: #fff;
-            border-radius: 50%;
-            padding: 0 5px;
-            font-size: 0.5rem;
-            position: absolute;
-            top: -2px;
-            right: -6px;
-        }
-
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
             body { padding: 6px; padding-bottom: 70px; }
             .app-header { padding: 12px 14px; }
@@ -640,7 +607,6 @@
             .account-item { padding: 14px 18px; }
         }
 
-        /* Scrollbar */
         ::-webkit-scrollbar {
             width: 3px;
         }
@@ -655,7 +621,6 @@
 </head>
 <body>
 
-    <!-- ===== HEADER ===== -->
     <div class="app-header">
         <div style="display:flex;justify-content:space-between;align-items:center;">
             <div>
@@ -676,13 +641,11 @@
         </div>
     </div>
 
-    <!-- ===== SEARCH ===== -->
     <div class="search-section">
         <input type="text" id="searchInput" placeholder="🔍 Tìm tài khoản..." />
-        <button class="filter-btn" id="sortBtn"><i class="fas fa-sort"></i></button>
+        <button class="filter-btn" id="sortBtn"><i class="fas fa-sort-amount-down"></i></button>
     </div>
 
-    <!-- ===== FILTER TABS ===== -->
     <div class="filter-tabs" id="filterTabs">
         <button class="tab active" data-filter="all">Tất cả <span class="badge-count" id="filterAll">0</span></button>
         <button class="tab" data-filter="active">Hoạt động <span class="badge-count" id="filterActive">0</span></button>
@@ -690,7 +653,6 @@
         <button class="tab" data-filter="starred">⭐ Yêu thích <span class="badge-count" id="filterStarred">0</span></button>
     </div>
 
-    <!-- ===== TOOLBAR ===== -->
     <div class="toolbar">
         <label class="btn btn-primary"><i class="fas fa-upload"></i> Tải file <input type="file" id="fileInput" accept=".txt" /></label>
         <button class="btn btn-success" id="syncBtn"><i class="fas fa-cloud-upload-alt"></i> Đồng bộ</button>
@@ -698,21 +660,18 @@
         <button class="btn btn-danger" id="clearBtn"><i class="fas fa-trash"></i> Xóa all</button>
     </div>
 
-    <!-- ===== LIST ===== -->
     <div class="list-container" id="listContainer">
         <div id="accountList">
             <div class="loading-spinner"><div class="spinner"></div></div>
         </div>
     </div>
 
-    <!-- ===== PAGINATION ===== -->
     <div class="pagination" id="pagination">
         <button class="btn-page" id="prevPage" disabled><i class="fas fa-chevron-left"></i></button>
         <span class="page-info" id="pageInfo">Trang 1</span>
         <button class="btn-page" id="nextPage" disabled><i class="fas fa-chevron-right"></i></button>
     </div>
 
-    <!-- ===== BOTTOM NAV ===== -->
     <div class="bottom-nav">
         <button class="nav-item active" id="navAll"><i class="fas fa-list"></i> Tất cả</button>
         <button class="nav-item" id="navActive"><i class="fas fa-check-circle" style="color:var(--green);"></i> Hoạt động</button>
@@ -721,7 +680,6 @@
         <button class="nav-item" id="navAdd"><i class="fas fa-plus-circle" style="color:var(--blue);"></i> Thêm</button>
     </div>
 
-    <!-- ===== TOAST ===== -->
     <div id="toast" class="toast">✅ Đã sao chép!</div>
 
     <script>
@@ -757,7 +715,6 @@
             const filterTabs = document.querySelectorAll('.tab');
             const navItems = document.querySelectorAll('.nav-item');
 
-            // Stats
             const totalCount = $('totalCount');
             const activeCount = $('activeCount');
             const inactiveCount = $('inactiveCount');
@@ -776,6 +733,7 @@
             let unsubscribeListener = null;
             let isFirstLoad = true;
             let isSyncing = false;
+            let currentAccountId = null;
 
             // ===== TOAST =====
             function showToast(msg, type = 'success') {
@@ -792,9 +750,12 @@
                     const orig = btn.innerHTML;
                     btn.innerHTML = '<i class="fas fa-check"></i>';
                     showToast('✅ Đã copy: ' + text);
-                    setTimeout(() => btn.innerHTML = orig, 1000);
+                    setTimeout(() => {
+                        btn.innerHTML = orig;
+                    }, 1500);
                 };
-                if (navigator.clipboard?.writeText) {
+                
+                if (navigator.clipboard && navigator.clipboard.writeText) {
                     navigator.clipboard.writeText(text).then(cb).catch(() => fallbackCopy(text, cb));
                 } else {
                     fallbackCopy(text, cb);
@@ -804,10 +765,15 @@
             function fallbackCopy(text, cb) {
                 const ta = document.createElement('textarea');
                 ta.value = text;
-                ta.style.cssText = 'position:fixed;opacity:0';
+                ta.style.cssText = 'position:fixed;opacity:0;left:-9999px;top:-9999px;';
                 document.body.appendChild(ta);
                 ta.select();
-                try { document.execCommand('copy'); cb(); } catch(e) { showToast('❌ Không copy được!', 'error'); }
+                try { 
+                    document.execCommand('copy'); 
+                    cb(); 
+                } catch(e) { 
+                    showToast('❌ Không copy được!', 'error'); 
+                }
                 document.body.removeChild(ta);
             }
 
@@ -841,6 +807,164 @@
                     }
                 }
                 return result;
+            }
+
+            // ===== FIND ACCOUNT BY ID =====
+            function findAccount(id) {
+                return allAccounts.find(a => {
+                    const aId = a.id || a._idx;
+                    return String(aId) === String(id);
+                });
+            }
+
+            // ===== UPDATE ACCOUNT =====
+            function updateAccount(id, data, keepPage = true) {
+                const acc = findAccount(id);
+                if (!acc) return false;
+                
+                Object.assign(acc, data);
+                
+                // Update Firebase if has real ID
+                if (acc.id && !String(acc.id).startsWith('local-')) {
+                    db.collection('accounts').doc(acc.id).update(data).catch(() => {});
+                }
+                
+                // Re-apply filters and render
+                applyFilters(keepPage);
+                return true;
+            }
+
+            // ===== TOGGLE FUNCTIONS =====
+            window.toggleStar = function(id, event) {
+                if (event) event.stopPropagation();
+                const acc = findAccount(id);
+                if (!acc) return;
+                const newStatus = !acc.starred;
+                updateAccount(id, { starred: newStatus }, true);
+                showToast(newStatus ? '⭐ Đã thêm yêu thích' : '⭐ Bỏ yêu thích');
+            };
+
+            window.toggleStatus = function(id, event) {
+                if (event) event.stopPropagation();
+                const acc = findAccount(id);
+                if (!acc) return;
+                const newStatus = acc.status === 'active' ? 'inactive' : 'active';
+                updateAccount(id, { status: newStatus }, true);
+                showToast(newStatus === 'active' ? '✅ Đã kích hoạt' : '❌ Đã đánh dấu sai MK');
+            };
+
+            window.toggleExpand = function(btn) {
+                const row = btn.closest('.account-item').querySelector('.expand-row');
+                if (row) {
+                    row.classList.toggle('open');
+                    const icon = btn.querySelector('i');
+                    if (icon) {
+                        icon.classList.toggle('fa-chevron-down');
+                        icon.classList.toggle('fa-chevron-up');
+                    }
+                }
+            };
+
+            window.editNote = function(id, event) {
+                if (event) event.stopPropagation();
+                const acc = findAccount(id);
+                if (!acc) return;
+                const note = prompt('Nhập ghi chú cho tài khoản:', acc.note || '');
+                if (note !== null) {
+                    updateAccount(id, { note: note.trim() }, true);
+                    showToast('📝 Đã cập nhật ghi chú');
+                }
+            };
+
+            window.deleteAccount = async function(id, event) {
+                if (event) event.stopPropagation();
+                if (!confirm('Xóa tài khoản này?')) return;
+                try {
+                    await db.collection('accounts').doc(id).delete();
+                    showToast('🗑️ Đã xóa!');
+                    // Remove from local array
+                    const idx = allAccounts.findIndex(a => (a.id || a._idx) === id);
+                    if (idx > -1) allAccounts.splice(idx, 1);
+                    applyFilters(true);
+                } catch(e) {
+                    showToast('❌ Lỗi xóa!', 'error');
+                }
+            };
+
+            window.removeLocal = function(id, event) {
+                if (event) event.stopPropagation();
+                if (!confirm('Xóa tài khoản này?')) return;
+                const idx = allAccounts.findIndex(a => (a.id || a._idx) === id);
+                if (idx > -1) {
+                    allAccounts.splice(idx, 1);
+                    applyFilters(true);
+                    showToast('🗑️ Đã xóa!');
+                }
+            };
+
+            // ===== COPY HANDLERS =====
+            window.copyUsername = function(username, btn, event) {
+                if (event) event.stopPropagation();
+                copyText(username, btn);
+            };
+
+            window.copyPassword = function(password, btn, event) {
+                if (event) event.stopPropagation();
+                copyText(password, btn);
+            };
+
+            window.copyAll = function(username, password, btn, event) {
+                if (event) event.stopPropagation();
+                copyText(`${username} | ${password}`, btn);
+            };
+
+            // ===== FILTER & SEARCH =====
+            function applyFilters(keepPage = false) {
+                const search = searchInput.value.toLowerCase().trim();
+                let result = [...allAccounts];
+
+                // Filter
+                if (currentFilter === 'active') result = result.filter(a => a.status === 'active');
+                else if (currentFilter === 'inactive') result = result.filter(a => a.status === 'inactive');
+                else if (currentFilter === 'starred') result = result.filter(a => a.starred);
+
+                // Search
+                if (search) {
+                    result = result.filter(a => 
+                        a.username.toLowerCase().includes(search) ||
+                        a.password.toLowerCase().includes(search) ||
+                        (a.level && a.level.toLowerCase().includes(search)) ||
+                        (a.note && a.note.toLowerCase().includes(search))
+                    );
+                }
+
+                // Sort
+                if (sortOrder === 'newest') {
+                    result.sort((a, b) => {
+                        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                        return dateB - dateA;
+                    });
+                } else if (sortOrder === 'oldest') {
+                    result.sort((a, b) => {
+                        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                        return dateA - dateB;
+                    });
+                } else if (sortOrder === 'username') {
+                    result.sort((a, b) => a.username.localeCompare(b.username));
+                }
+
+                filteredAccounts = result;
+                
+                if (!keepPage) {
+                    currentPage = 1;
+                } else {
+                    const totalPages = Math.max(1, Math.ceil(result.length / pageSize));
+                    if (currentPage > totalPages) currentPage = totalPages;
+                }
+                
+                renderAccounts(filteredAccounts);
             }
 
             // ===== RENDER =====
@@ -883,38 +1007,44 @@
                 }
 
                 let html = '';
-                pageData.forEach((acc, idx) => {
-                    const globalIdx = start + idx;
+                pageData.forEach((acc) => {
+                    const accId = acc.id || acc._idx;
                     const levelDisplay = acc.level?.replace(/LEVEL\s*:\s*/i, '').trim() || '?';
                     const isStarred = acc.starred;
                     const isActive = acc.status === 'active';
 
+                    // Escape for HTML
+                    const escUser = escapeHtml(acc.username);
+                    const escPass = escapeHtml(acc.password);
+                    const escLevel = escapeHtml(levelDisplay);
+                    const escNote = acc.note ? escapeHtml(acc.note) : '';
+
                     html += `
-                        <div class="account-item" data-id="${acc.id || globalIdx}">
+                        <div class="account-item" data-id="${accId}">
                             <div class="main-row">
                                 <div class="avatar">
                                     <i class="fas fa-user${isActive ? '' : '-slash'}" style="color:${isActive ? 'var(--green)' : 'var(--red)'};"></i>
                                 </div>
                                 <div class="info">
-                                    <div class="username">${escapeHtml(acc.username)}</div>
-                                    <div class="password">${escapeHtml(acc.password)}</div>
+                                    <div class="username">${escUser}</div>
+                                    <div class="password">${escPass}</div>
                                     <div class="meta">
-                                        <span class="tag level"><i class="fas fa-star"></i> ${escapeHtml(levelDisplay)}</span>
+                                        <span class="tag level"><i class="fas fa-star"></i> ${escLevel}</span>
                                         <span class="tag ${isActive ? 'status-active' : 'status-inactive'}">
                                             <i class="fas fa-${isActive ? 'check' : 'times'}-circle"></i> ${isActive ? 'Hoạt động' : 'Sai MK'}
                                         </span>
                                         ${isStarred ? '<span class="tag starred"><i class="fas fa-star"></i> Yêu thích</span>' : ''}
-                                        ${acc.note ? `<span class="tag"><i class="fas fa-pen"></i> ${escapeHtml(acc.note)}</span>` : ''}
+                                        ${escNote ? `<span class="tag"><i class="fas fa-pen"></i> ${escNote}</span>` : ''}
                                     </div>
                                 </div>
                                 <div class="actions">
-                                    <button class="btn-icon star ${isStarred ? 'active' : ''}" onclick="toggleStar('${acc.id || globalIdx}')">
+                                    <button class="btn-icon star ${isStarred ? 'active' : ''}" onclick="toggleStar('${accId}', event)">
                                         <i class="fas fa-star"></i>
                                     </button>
-                                    <button class="btn-icon status-toggle ${isActive ? 'active-status' : 'inactive-status'}" onclick="toggleStatus('${acc.id || globalIdx}')">
+                                    <button class="btn-icon status-toggle ${isActive ? 'active-status' : 'inactive-status'}" onclick="toggleStatus('${accId}', event)">
                                         <i class="fas fa-${isActive ? 'check' : 'times'}"></i>
                                     </button>
-                                    <button class="btn-icon copy" onclick="copyText('${escapeHtml(acc.username)}', this)">
+                                    <button class="btn-icon copy" onclick="copyUsername('${escUser}', this, event)">
                                         <i class="fas fa-copy"></i>
                                     </button>
                                     <button class="btn-icon" onclick="toggleExpand(this)">
@@ -923,13 +1053,13 @@
                                 </div>
                             </div>
                             <div class="expand-row">
-                                <button class="btn-sm" onclick="copyText('${escapeHtml(acc.username)}', this)"><i class="fas fa-user"></i> TK</button>
-                                <button class="btn-sm" onclick="copyText('${escapeHtml(acc.password)}', this)"><i class="fas fa-lock"></i> MK</button>
-                                <button class="btn-sm" onclick="copyText('${escapeHtml(acc.username)} | ${escapeHtml(acc.password)}', this)"><i class="fas fa-copy"></i> All</button>
-                                <button class="btn-sm" onclick="editNote('${acc.id || globalIdx}')"><i class="fas fa-pen"></i> Ghi chú</button>
+                                <button class="btn-sm" onclick="copyUsername('${escUser}', this, event)"><i class="fas fa-user"></i> TK</button>
+                                <button class="btn-sm" onclick="copyPassword('${escPass}', this, event)"><i class="fas fa-lock"></i> MK</button>
+                                <button class="btn-sm" onclick="copyAll('${escUser}', '${escPass}', this, event)"><i class="fas fa-copy"></i> All</button>
+                                <button class="btn-sm" onclick="editNote('${accId}', event)"><i class="fas fa-pen"></i> Ghi chú</button>
                                 ${acc.id && !String(acc.id).startsWith('local-') ? 
-                                    `<button class="btn-sm danger" onclick="deleteAccount('${acc.id}')"><i class="fas fa-trash"></i> Xóa</button>` : 
-                                    `<button class="btn-sm danger" onclick="removeLocal('${acc.id || globalIdx}')"><i class="fas fa-trash"></i> Xóa</button>`
+                                    `<button class="btn-sm danger" onclick="deleteAccount('${acc.id}', event)"><i class="fas fa-trash"></i> Xóa</button>` : 
+                                    `<button class="btn-sm danger" onclick="removeLocal('${accId}', event)"><i class="fas fa-trash"></i> Xóa</button>`
                                 }
                             </div>
                         </div>
@@ -944,111 +1074,6 @@
                 const d = document.createElement('div');
                 d.textContent = text;
                 return d.innerHTML;
-            }
-
-            // ===== TOGGLE FUNCTIONS =====
-            window.toggleStar = function(id) {
-                const acc = findAccount(id);
-                if (!acc) return;
-                acc.starred = !acc.starred;
-                updateAccount(id, { starred: acc.starred });
-                applyFilters();
-                showToast(acc.starred ? '⭐ Đã thêm yêu thích' : '⭐ Bỏ yêu thích');
-            };
-
-            window.toggleStatus = function(id) {
-                const acc = findAccount(id);
-                if (!acc) return;
-                acc.status = acc.status === 'active' ? 'inactive' : 'active';
-                updateAccount(id, { status: acc.status });
-                applyFilters();
-                showToast(acc.status === 'active' ? '✅ Đã kích hoạt' : '❌ Đã đánh dấu sai MK');
-            };
-
-            window.toggleExpand = function(btn) {
-                const row = btn.closest('.account-item').querySelector('.expand-row');
-                row.classList.toggle('open');
-                btn.querySelector('i').classList.toggle('fa-chevron-down');
-                btn.querySelector('i').classList.toggle('fa-chevron-up');
-            };
-
-            window.editNote = function(id) {
-                const acc = findAccount(id);
-                if (!acc) return;
-                const note = prompt('Nhập ghi chú cho tài khoản:', acc.note || '');
-                if (note !== null) {
-                    acc.note = note.trim();
-                    updateAccount(id, { note: acc.note });
-                    applyFilters();
-                    showToast('📝 Đã cập nhật ghi chú');
-                }
-            };
-
-            window.deleteAccount = async function(id) {
-                if (!confirm('Xóa tài khoản này?')) return;
-                try {
-                    await db.collection('accounts').doc(id).delete();
-                    showToast('🗑️ Đã xóa!');
-                } catch(e) {
-                    showToast('❌ Lỗi xóa!', 'error');
-                }
-            };
-
-            window.removeLocal = function(id) {
-                if (!confirm('Xóa tài khoản này?')) return;
-                const idx = allAccounts.findIndex(a => (a.id || a._idx) === id);
-                if (idx > -1) {
-                    allAccounts.splice(idx, 1);
-                    applyFilters();
-                    showToast('🗑️ Đã xóa!');
-                }
-            };
-
-            function findAccount(id) {
-                return allAccounts.find(a => (a.id || a._idx) === id);
-            }
-
-            function updateAccount(id, data) {
-                const acc = findAccount(id);
-                if (acc) Object.assign(acc, data);
-                // Nếu có ID thật, update lên Firebase
-                if (acc && acc.id && !String(acc.id).startsWith('local-')) {
-                    db.collection('accounts').doc(acc.id).update(data).catch(() => {});
-                }
-            }
-
-            // ===== FILTER & SEARCH =====
-            function applyFilters() {
-                const search = searchInput.value.toLowerCase().trim();
-                let result = [...allAccounts];
-
-                // Filter
-                if (currentFilter === 'active') result = result.filter(a => a.status === 'active');
-                else if (currentFilter === 'inactive') result = result.filter(a => a.status === 'inactive');
-                else if (currentFilter === 'starred') result = result.filter(a => a.starred);
-
-                // Search
-                if (search) {
-                    result = result.filter(a => 
-                        a.username.toLowerCase().includes(search) ||
-                        a.password.toLowerCase().includes(search) ||
-                        (a.level && a.level.toLowerCase().includes(search)) ||
-                        (a.note && a.note.toLowerCase().includes(search))
-                    );
-                }
-
-                // Sort
-                if (sortOrder === 'newest') {
-                    result.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-                } else if (sortOrder === 'oldest') {
-                    result.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-                } else if (sortOrder === 'username') {
-                    result.sort((a, b) => a.username.localeCompare(b.username));
-                }
-
-                filteredAccounts = result;
-                currentPage = 1;
-                renderAccounts(filteredAccounts);
             }
 
             // ===== FIREBASE =====
@@ -1079,21 +1104,25 @@
                                     createdAt: data.createdAt
                                 });
                             });
-                            // Merge với dữ liệu local (nếu có)
-                            const localIds = new Set();
-                            allAccounts.forEach(a => {
-                                if (a.id && !String(a.id).startsWith('local-')) localIds.add(a.id);
-                            });
-                            // Giữ lại local accounts chưa có trên Firebase
+                            
+                            // Merge with local accounts
                             const keepLocal = allAccounts.filter(a => 
                                 a.id && String(a.id).startsWith('local-')
                             );
+                            
+                            // Remove old Firebase IDs from allAccounts
+                            allAccounts = allAccounts.filter(a => 
+                                a.id && String(a.id).startsWith('local-')
+                            );
+                            
                             allAccounts = [...accounts, ...keepLocal];
-                            // Gán _idx cho local
+                            
+                            // Ensure each has _idx for local
                             allAccounts.forEach((a, i) => {
-                                if (!a.id) a._idx = `local-${i}`;
+                                if (!a.id) a._idx = `local-${Date.now()}-${i}`;
                             });
-                            applyFilters();
+                            
+                            applyFilters(true);
                             document.getElementById('statusBadge').innerHTML = 
                                 '<i class="fas fa-circle" style="color:var(--green);font-size:0.5rem;"></i> Online';
                             if (isFirstLoad) {
@@ -1130,10 +1159,18 @@
                 try {
                     const batch = db.batch();
                     const colRef = db.collection('accounts');
-                    const snapshot = await colRef.get();
-                    snapshot.forEach(doc => batch.delete(doc.ref));
+                    
+                    // Only upload local accounts
+                    const toUpload = accounts.filter(a => !a.id || String(a.id).startsWith('local-'));
+                    if (toUpload.length === 0) {
+                        showToast('⚠️ Không có tài khoản mới để đồng bộ!', 'warning');
+                        isSyncing = false;
+                        syncBtn.disabled = false;
+                        syncBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Đồng bộ';
+                        return;
+                    }
 
-                    accounts.forEach(acc => {
+                    toUpload.forEach(acc => {
                         const newDoc = colRef.doc();
                         batch.set(newDoc, {
                             username: acc.username,
@@ -1147,7 +1184,10 @@
                     });
 
                     await batch.commit();
-                    showToast(`✅ Đã đồng bộ ${accounts.length} tài khoản!`);
+                    showToast(`✅ Đã đồng bộ ${toUpload.length} tài khoản!`);
+                    
+                    // Remove local IDs and reload
+                    allAccounts = allAccounts.filter(a => a.id && !String(a.id).startsWith('local-'));
                     if (unsubscribeListener) {
                         unsubscribeListener();
                         unsubscribeListener = null;
@@ -1171,9 +1211,8 @@
                     const batch = db.batch();
                     snapshot.forEach(doc => batch.delete(doc.ref));
                     await batch.commit();
-                    // Xóa cả local
-                    allAccounts = allAccounts.filter(a => a.id && String(a.id).startsWith('local-'));
-                    applyFilters();
+                    allAccounts = [];
+                    applyFilters(true);
                     showToast('🗑️ Đã xóa tất cả!');
                 } catch(e) {
                     showToast('❌ Lỗi xóa!', 'error');
@@ -1192,8 +1231,11 @@
             }
 
             // ===== EVENT LISTENERS =====
+            
             // Search
-            searchInput.addEventListener('input', applyFilters);
+            searchInput.addEventListener('input', function() {
+                applyFilters(false);
+            });
 
             // File upload
             fileInput.addEventListener('change', function(e) {
@@ -1204,10 +1246,13 @@
                     const accounts = parseAccounts(ev.target.result);
                     if (accounts.length > 0) {
                         showToast(`📄 Đã đọc ${accounts.length} tài khoản`);
-                        // Gán ID local
-                        accounts.forEach((a, i) => a._idx = `local-${Date.now()}-${i}`);
-                        allAccounts = [...allAccounts, ...accounts];
-                        uploadToFirebase(allAccounts.filter(a => !a.id || String(a.id).startsWith('local-')));
+                        // Add to allAccounts
+                        accounts.forEach((a, i) => {
+                            a._idx = `local-${Date.now()}-${i}`;
+                            allAccounts.push(a);
+                        });
+                        uploadToFirebase(accounts);
+                        applyFilters(false);
                     } else {
                         showToast('⚠️ Không có tài khoản hợp lệ!', 'warning');
                     }
@@ -1223,12 +1268,14 @@
                     filterTabs.forEach(t => t.classList.remove('active'));
                     this.classList.add('active');
                     currentFilter = this.dataset.filter;
-                    // Cập nhật bottom nav
+                    
+                    // Update bottom nav
                     navItems.forEach(n => n.classList.remove('active'));
                     const navMap = { all: 'navAll', active: 'navActive', inactive: 'navInactive', starred: 'navStarred' };
                     const navId = navMap[currentFilter];
                     if (navId) document.getElementById(navId)?.classList.add('active');
-                    applyFilters();
+                    
+                    applyFilters(false);
                 });
             });
 
@@ -1242,22 +1289,22 @@
                     const filter = map[this.id];
                     if (filter) {
                         filterTabs.forEach(t => t.classList.remove('active'));
-                        document.querySelector(`.tab[data-filter="${filter}"]`)?.classList.add('active');
+                        const targetTab = document.querySelector(`.tab[data-filter="${filter}"]`);
+                        if (targetTab) targetTab.classList.add('active');
                         currentFilter = filter;
                         navItems.forEach(n => n.classList.remove('active'));
                         this.classList.add('active');
-                        applyFilters();
+                        applyFilters(false);
                     }
                     if (this.id === 'navAdd') {
-                        // Thêm tài khoản mới
                         const user = prompt('Nhập tài khoản:');
-                        if (user) {
+                        if (user && user.trim()) {
                             const pass = prompt('Nhập mật khẩu:');
                             if (pass !== null) {
                                 const level = prompt('Nhập level (VD: 30):') || '?';
                                 const newAcc = {
                                     username: user.trim(),
-                                    password: pass.trim(),
+                                    password: pass.trim() || '',
                                     level: level.trim() || '?',
                                     status: 'active',
                                     starred: false,
@@ -1267,7 +1314,7 @@
                                 };
                                 allAccounts.push(newAcc);
                                 uploadToFirebase([newAcc]);
-                                applyFilters();
+                                applyFilters(false);
                                 showToast('✅ Đã thêm tài khoản!');
                             }
                         }
@@ -1283,32 +1330,44 @@
                 const nextIdx = (idx + 1) % orders.length;
                 sortOrder = orders[nextIdx];
                 this.innerHTML = `<i class="fas ${icons[nextIdx]}"></i>`;
-                applyFilters();
+                applyFilters(true);
             });
 
             // Pagination
             prevPage.addEventListener('click', () => {
-                if (currentPage > 1) { currentPage--; renderAccounts(filteredAccounts); }
+                if (currentPage > 1) { 
+                    currentPage--; 
+                    renderAccounts(filteredAccounts); 
+                    document.querySelector('.list-container').scrollTop = 0;
+                }
             });
+            
             nextPage.addEventListener('click', () => {
                 const totalPages = Math.ceil(filteredAccounts.length / pageSize);
-                if (currentPage < totalPages) { currentPage++; renderAccounts(filteredAccounts); }
+                if (currentPage < totalPages) { 
+                    currentPage++; 
+                    renderAccounts(filteredAccounts);
+                    document.querySelector('.list-container').scrollTop = 0;
+                }
             });
 
             // Buttons
             syncBtn.addEventListener('click', () => {
-                if (allAccounts.length === 0) {
-                    showToast('⚠️ Không có tài khoản!', 'warning');
+                const localAccounts = allAccounts.filter(a => !a.id || String(a.id).startsWith('local-'));
+                if (localAccounts.length === 0) {
+                    showToast('⚠️ Không có tài khoản mới!', 'warning');
                     return;
                 }
-                uploadToFirebase(allAccounts.filter(a => !a.id || String(a.id).startsWith('local-')));
+                uploadToFirebase(localAccounts);
             });
+            
             clearBtn.addEventListener('click', clearAllAccounts);
             retryBtn.addEventListener('click', retryConnection);
 
             // ===== DRAG & DROP =====
-            document.querySelector('.list-container').addEventListener('dragover', e => e.preventDefault());
-            document.querySelector('.list-container').addEventListener('drop', function(e) {
+            const container = document.querySelector('.list-container');
+            container.addEventListener('dragover', e => e.preventDefault());
+            container.addEventListener('drop', function(e) {
                 e.preventDefault();
                 const files = e.dataTransfer.files;
                 if (files.length > 0 && files[0].name.endsWith('.txt')) {
@@ -1323,7 +1382,7 @@
 
             // ===== INIT =====
             setupListener();
-            console.log('✅ App ready! Mobile optimized for 15k accounts.');
+            console.log('✅ App ready! All bugs fixed.');
         });
     </script>
 
