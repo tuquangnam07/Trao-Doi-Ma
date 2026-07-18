@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Danh sách tài khoản Liên Quân - Firebase</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Quản lý tài khoản Liên Quân</title>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <!-- Firebase SDK -->
@@ -14,370 +14,473 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-primary: #0f0f1a;
+            --bg-secondary: #1a1a2e;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --text-primary: #fff;
+            --text-secondary: #aaa;
+            --gold: #ffd700;
+            --green: #2ecc71;
+            --red: #e74c3c;
+            --blue: #3498db;
+            --border-color: rgba(255, 255, 255, 0.06);
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
-            padding: 20px 15px;
-            color: #fff;
+            padding: 10px;
+            padding-bottom: 80px;
+            overflow-x: hidden;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.05);
+        /* ===== HEADER ===== */
+        .app-header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border-radius: 16px;
+            padding: 16px 18px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
             backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 25px 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        h1 {
-            text-align: center;
-            font-size: 2rem;
+        .app-header h1 {
+            font-size: 1.3rem;
             font-weight: 700;
-            margin-bottom: 5px;
             background: linear-gradient(90deg, #f7971e, #ffd200);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            letter-spacing: 2px;
-        }
-
-        .sub-title {
-            text-align: center;
-            color: #aaa;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            padding-bottom: 12px;
-        }
-
-        .status-bar {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
             gap: 8px;
-            padding: 8px 15px;
-            background: rgba(255,255,255,0.04);
-            border-radius: 12px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255,255,255,0.05);
-            font-size: 0.85rem;
         }
 
-        .status-item {
+        .app-header .sub {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+            font-size: 0.75rem;
+        }
+
+        .header-stats .stat-item {
+            background: rgba(255,255,255,0.05);
+            padding: 4px 12px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
-            gap: 6px;
-            color: #bbb;
+            gap: 5px;
         }
 
-        .badge {
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-weight: 600;
+        .header-stats .stat-item i {
             font-size: 0.7rem;
         }
 
-        .badge.online { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
-        .badge.offline { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
-        .badge.synced { background: rgba(52, 152, 219, 0.2); color: #3498db; }
+        .stat-active { color: var(--green); }
+        .stat-inactive { color: var(--red); }
+        .stat-starred { color: var(--gold); }
 
-        /* Search and Filter */
-        .search-bar {
+        /* ===== SEARCH BAR ===== */
+        .search-section {
             display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 8px;
+            margin-bottom: 10px;
             flex-wrap: wrap;
         }
 
-        .search-bar input {
+        .search-section input {
             flex: 1;
-            min-width: 200px;
-            padding: 10px 18px;
+            min-width: 140px;
+            padding: 10px 16px;
             border-radius: 30px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--border-color);
             background: rgba(255,255,255,0.06);
             color: #fff;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             outline: none;
             transition: 0.3s;
         }
 
-        .search-bar input:focus {
-            border-color: #ffd700;
+        .search-section input:focus {
+            border-color: var(--gold);
             background: rgba(255,255,255,0.1);
-            box-shadow: 0 0 20px rgba(255,215,0,0.05);
         }
 
-        .search-bar input::placeholder {
-            color: #666;
+        .search-section input::placeholder {
+            color: #555;
         }
 
-        .search-bar select {
-            padding: 10px 18px;
+        .search-section .filter-btn {
+            padding: 10px 14px;
             border-radius: 30px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--border-color);
             background: rgba(255,255,255,0.06);
-            color: #fff;
-            font-size: 0.95rem;
-            outline: none;
+            color: #aaa;
             cursor: pointer;
-            min-width: 120px;
+            transition: 0.3s;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
         }
 
-        .search-bar select option {
-            background: #1a1a2e;
-            color: #fff;
+        .search-section .filter-btn.active {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(255,215,0,0.1);
         }
 
+        .search-section .filter-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* ===== FILTER TABS ===== */
+        .filter-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+            overflow-x: auto;
+            padding: 2px 0;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .filter-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .filter-tabs .tab {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.3s;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .filter-tabs .tab:active {
+            transform: scale(0.95);
+        }
+
+        .filter-tabs .tab.active {
+            background: rgba(255,215,0,0.15);
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .filter-tabs .tab .badge-count {
+            background: rgba(255,255,255,0.1);
+            padding: 0 6px;
+            border-radius: 10px;
+            font-size: 0.65rem;
+            margin-left: 4px;
+        }
+
+        .filter-tabs .tab.active .badge-count {
+            background: rgba(255,215,0,0.2);
+        }
+
+        /* ===== TOOLBAR ===== */
         .toolbar {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .stats {
-            background: rgba(255,255,255,0.06);
-            padding: 6px 16px;
-            border-radius: 30px;
-            font-size: 0.85rem;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .stats span { color: #ffd700; font-weight: 700; }
-
-        .btn-group {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 8px 18px;
-            border-radius: 30px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
-            border: 1px solid transparent;
-            background: rgba(255,255,255,0.06);
-            color: #ccc;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .btn-upload {
-            background: rgba(255,215,0,0.12);
-            color: #ffd700;
-            border-color: rgba(255,215,0,0.25);
-        }
-        .btn-upload:hover { background: rgba(255,215,0,0.25); }
-
-        .btn-upload input { display: none; }
-
-        .btn-sync {
-            background: rgba(52, 152, 219, 0.12);
-            color: #3498db;
-            border-color: rgba(52, 152, 219, 0.25);
-        }
-        .btn-sync:hover { background: rgba(52, 152, 219, 0.25); }
-
-        .btn-retry {
-            background: rgba(241, 196, 15, 0.12);
-            color: #f1c40f;
-            border-color: rgba(241, 196, 15, 0.25);
-        }
-        .btn-retry:hover { background: rgba(241, 196, 15, 0.25); }
-
-        .btn-clear {
-            background: rgba(231, 76, 60, 0.12);
-            color: #e74c3c;
-            border-color: rgba(231, 76, 60, 0.25);
-        }
-        .btn-clear:hover { background: rgba(231, 76, 60, 0.25); }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        /* Account List - Virtual Scroll Container */
-        .account-list-container {
-            position: relative;
-            height: 600px;
-            overflow-y: auto;
-            overflow-x: hidden;
-            border-radius: 12px;
-            background: rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .account-list-container::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .account-list-container::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.02);
-        }
-
-        .account-list-container::-webkit-scrollbar-thumb {
-            background: rgba(255,215,0,0.3);
-            border-radius: 10px;
-        }
-
-        .account-list-container::-webkit-scrollbar-thumb:hover {
-            background: rgba(255,215,0,0.5);
-        }
-
-        .account-list-inner {
-            position: relative;
-            width: 100%;
-        }
-
-        .account-card {
-            background: rgba(255, 255, 255, 0.04);
-            border-radius: 10px;
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            transition: 0.2s ease;
-            margin-bottom: 6px;
-            position: absolute;
-            left: 0;
-            right: 0;
-            will-change: transform;
-        }
-
-        .account-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 215, 0, 0.15);
-        }
-
-        .account-info {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px 20px;
-            flex: 1;
-            min-width: 150px;
-        }
-
-        .account-info .field {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .account-info .label {
-            color: #888;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-
-        .account-info .value {
-            font-weight: 600;
-            font-size: 0.9rem;
-            word-break: break-all;
-        }
-
-        .account-info .value.username { color: #7ec8f0; }
-        .account-info .value.password { color: #f5a97f; }
-        .account-info .value.level {
-            color: #ffd700;
-            background: rgba(255,215,0,0.1);
-            padding: 1px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-        }
-
-        .account-actions {
-            display: flex;
             gap: 6px;
+            margin-bottom: 10px;
             flex-wrap: wrap;
         }
 
-        .btn-copy, .btn-delete {
-            padding: 6px 12px;
-            border-radius: 20px;
-            border: none;
-            cursor: pointer;
-            font-size: 0.75rem;
-            transition: 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
+        .toolbar .btn {
+            padding: 8px 14px;
+            border-radius: 30px;
+            border: 1px solid var(--border-color);
             background: rgba(255,255,255,0.05);
             color: #aaa;
-            border: 1px solid transparent;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex: 1;
+            justify-content: center;
+            min-width: 60px;
         }
 
-        .btn-copy:hover {
-            background: rgba(255,215,0,0.15);
-            color: #ffd700;
+        .toolbar .btn:active {
+            transform: scale(0.95);
+        }
+
+        .toolbar .btn-primary {
+            background: rgba(255,215,0,0.12);
+            color: var(--gold);
             border-color: rgba(255,215,0,0.2);
         }
 
-        .btn-copy.copied {
-            background: rgba(46, 204, 113, 0.2);
-            color: #2ecc71;
-            border-color: rgba(46, 204, 113, 0.3);
-        }
-
-        .btn-delete:hover {
-            background: rgba(231, 76, 60, 0.2);
-            color: #e74c3c;
+        .toolbar .btn-danger {
+            background: rgba(231, 76, 60, 0.12);
+            color: var(--red);
             border-color: rgba(231, 76, 60, 0.2);
         }
 
-        /* Pagination */
+        .toolbar .btn-success {
+            background: rgba(46, 204, 113, 0.12);
+            color: var(--green);
+            border-color: rgba(46, 204, 113, 0.2);
+        }
+
+        .toolbar .btn-info {
+            background: rgba(52, 152, 219, 0.12);
+            color: var(--blue);
+            border-color: rgba(52, 152, 219, 0.2);
+        }
+
+        .toolbar .btn input {
+            display: none;
+        }
+
+        /* ===== ACCOUNT LIST ===== */
+        .list-container {
+            border-radius: 12px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .account-item {
+            background: var(--bg-card);
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border-color);
+            transition: 0.2s;
+            animation: slideIn 0.2s ease;
+        }
+
+        .account-item:last-child {
+            border-bottom: none;
+        }
+
+        .account-item:active {
+            background: rgba(255,255,255,0.08);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .account-item .main-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .account-item .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,215,0,0.05));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            border: 1px solid rgba(255,215,0,0.1);
+        }
+
+        .account-item .info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .account-item .username {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #7ec8f0;
+            word-break: break-all;
+        }
+
+        .account-item .password {
+            font-size: 0.8rem;
+            color: #f5a97f;
+            word-break: break-all;
+            font-family: monospace;
+        }
+
+        .account-item .meta {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+
+        .account-item .tag {
+            font-size: 0.6rem;
+            padding: 1px 8px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.05);
+            color: var(--text-secondary);
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .tag.level {
+            color: var(--gold);
+            background: rgba(255,215,0,0.1);
+        }
+
+        .tag.status-active {
+            color: var(--green);
+            background: rgba(46, 204, 113, 0.15);
+        }
+
+        .tag.status-inactive {
+            color: var(--red);
+            background: rgba(231, 76, 60, 0.15);
+        }
+
+        .tag.starred {
+            color: var(--gold);
+            background: rgba(255,215,0,0.15);
+        }
+
+        .account-item .actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .account-item .actions .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.05);
+            color: #888;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .account-item .actions .btn-icon:active {
+            transform: scale(0.85);
+        }
+
+        .account-item .actions .btn-icon.copy:active {
+            background: rgba(255,215,0,0.2);
+            color: var(--gold);
+        }
+
+        .account-item .actions .btn-icon.star {
+            font-size: 0.8rem;
+        }
+
+        .account-item .actions .btn-icon.star.active {
+            color: var(--gold);
+        }
+
+        .account-item .actions .btn-icon.status-toggle.active-status {
+            color: var(--green);
+        }
+
+        .account-item .actions .btn-icon.status-toggle.inactive-status {
+            color: var(--red);
+        }
+
+        .account-item .expand-row {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border-color);
+            display: none;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .account-item .expand-row.open {
+            display: flex;
+        }
+
+        .account-item .expand-row .btn-sm {
+            padding: 4px 12px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.04);
+            color: #aaa;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .account-item .expand-row .btn-sm:active {
+            transform: scale(0.95);
+        }
+
+        .account-item .expand-row .btn-sm.danger {
+            color: var(--red);
+            border-color: rgba(231, 76, 60, 0.2);
+        }
+
+        /* ===== PAGINATION ===== */
         .pagination {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 8px;
-            margin-top: 15px;
+            gap: 6px;
+            padding: 12px 0;
             flex-wrap: wrap;
         }
 
         .pagination .btn-page {
-            padding: 6px 14px;
+            padding: 6px 12px;
             border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.04);
             color: #aaa;
             cursor: pointer;
+            font-size: 0.75rem;
             transition: 0.2s;
-            font-size: 0.8rem;
+            min-width: 32px;
+            text-align: center;
         }
 
-        .pagination .btn-page:hover {
-            background: rgba(255,215,0,0.15);
-            color: #ffd700;
+        .pagination .btn-page:active {
+            transform: scale(0.9);
         }
 
         .pagination .btn-page.active {
-            background: rgba(255,215,0,0.2);
-            color: #ffd700;
-            border-color: rgba(255,215,0,0.3);
+            background: rgba(255,215,0,0.15);
+            color: var(--gold);
+            border-color: rgba(255,215,0,0.2);
         }
 
         .pagination .btn-page:disabled {
@@ -386,54 +489,49 @@
         }
 
         .pagination .page-info {
-            color: #888;
-            font-size: 0.85rem;
-            padding: 0 10px;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            padding: 0 6px;
         }
 
+        /* ===== EMPTY STATE ===== */
         .empty-state {
             text-align: center;
             padding: 40px 20px;
-            color: #777;
+            color: #555;
         }
 
         .empty-state i {
             font-size: 2.5rem;
-            color: #444;
+            color: #333;
             margin-bottom: 10px;
             display: block;
         }
 
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 50%;
-            border-top-color: #ffd700;
-            animation: spin 0.8s ease infinite;
+        .empty-state p {
+            font-size: 0.85rem;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
+        /* ===== TOAST ===== */
         .toast {
             position: fixed;
-            bottom: 20px;
+            bottom: 70px;
             left: 50%;
             transform: translateX(-50%) translateY(80px);
-            padding: 12px 24px;
-            border-radius: 50px;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.8rem;
             font-weight: 600;
-            font-size: 0.9rem;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
             opacity: 0;
             transition: all 0.4s ease;
             pointer-events: none;
             z-index: 999;
-            background: #2ecc71;
+            background: rgba(0,0,0,0.85);
             color: #fff;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            max-width: 90%;
+            text-align: center;
         }
 
         .toast.show {
@@ -441,132 +539,193 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        .toast.error { background: #e74c3c; }
-        .toast.warning { background: #f39c12; }
+        .toast.success { border-color: var(--green); }
+        .toast.error { border-color: var(--red); }
+        .toast.warning { border-color: var(--gold); }
 
-        /* Loading overlay */
-        .loading-overlay {
-            position: absolute;
-            top: 0;
+        /* ===== LOADING ===== */
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255,255,255,0.05);
+            border-radius: 50%;
+            border-top-color: var(--gold);
+            animation: spin 0.8s ease infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== BOTTOM NAV ===== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(15,15,26,0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border-color);
             display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            z-index: 10;
+            justify-content: space-around;
+            padding: 6px 0;
+            z-index: 200;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .bottom-nav .nav-item {
+            display: flex;
             flex-direction: column;
-            gap: 10px;
+            align-items: center;
+            gap: 1px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            background: transparent;
+            border: none;
+            color: #666;
+            font-size: 0.55rem;
+            cursor: pointer;
+            transition: 0.3s;
+            min-width: 50px;
         }
 
-        .loading-overlay.hidden {
-            display: none;
+        .bottom-nav .nav-item i {
+            font-size: 1.1rem;
         }
 
-        @media (max-width: 768px) {
-            .container { padding: 15px 10px; }
-            .account-card { flex-direction: column; align-items: stretch; }
-            .account-info { gap: 6px; }
-            .account-actions { justify-content: center; }
-            .btn-copy, .btn-delete { flex: 1; justify-content: center; padding: 8px; }
-            .search-bar input { min-width: 150px; }
-            .status-bar { flex-direction: column; align-items: stretch; gap: 5px; }
-            .account-list-container { height: 400px; }
+        .bottom-nav .nav-item.active {
+            color: var(--gold);
         }
 
+        .bottom-nav .nav-item:active {
+            transform: scale(0.9);
+        }
+
+        .bottom-nav .nav-item .nav-badge {
+            background: var(--red);
+            color: #fff;
+            border-radius: 50%;
+            padding: 0 5px;
+            font-size: 0.5rem;
+            position: absolute;
+            top: -2px;
+            right: -6px;
+        }
+
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
-            .account-list-container { height: 350px; }
-            .account-info .value { font-size: 0.8rem; }
-            .btn { font-size: 0.75rem; padding: 6px 12px; }
+            body { padding: 6px; padding-bottom: 70px; }
+            .app-header { padding: 12px 14px; }
+            .app-header h1 { font-size: 1.1rem; }
+            .account-item { padding: 10px 12px; }
+            .account-item .username { font-size: 0.8rem; }
+            .account-item .password { font-size: 0.7rem; }
+            .search-section input { font-size: 0.8rem; padding: 8px 14px; }
+            .filter-tabs .tab { font-size: 0.65rem; padding: 4px 10px; }
+            .toolbar .btn { font-size: 0.65rem; padding: 6px 10px; }
+            .pagination .btn-page { padding: 4px 10px; font-size: 0.65rem; }
+            .account-item .actions .btn-icon { width: 28px; height: 28px; font-size: 0.65rem; }
+            .bottom-nav .nav-item { font-size: 0.5rem; padding: 2px 8px; }
+            .bottom-nav .nav-item i { font-size: 0.95rem; }
+        }
+
+        @media (min-width: 768px) {
+            body { padding: 20px; padding-bottom: 90px; max-width: 800px; margin: 0 auto; }
+            .account-item { padding: 14px 18px; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 3px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,215,0,0.2);
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>⚔️ Liên Quân Mobile</h1>
-        <div class="sub-title">📋 Danh sách tài khoản &amp; mật khẩu</div>
-
-        <div class="status-bar">
-            <div class="status-item">
-                <i class="fas fa-database"></i>
-                Trạng thái: <span class="badge online" id="statusBadge">Đang kết nối</span>
+    <!-- ===== HEADER ===== -->
+    <div class="app-header">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+                <h1><i class="fas fa-gamepad" style="font-size:1rem;"></i> Liên Quân</h1>
+                <div class="sub">Quản lý tài khoản</div>
             </div>
-            <div class="status-item">
-                <i class="fas fa-sync"></i>
-                Đồng bộ: <span class="badge synced" id="syncBadge">Tự động</span>
-            </div>
-            <div class="status-item">
-                <i class="fas fa-clock"></i>
-                Cập nhật: <span id="lastUpdate">--</span>
-            </div>
-        </div>
-
-        <!-- Search -->
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm tài khoản..." />
-            <select id="pageSizeSelect">
-                <option value="20">20 / trang</option>
-                <option value="50" selected>50 / trang</option>
-                <option value="100">100 / trang</option>
-                <option value="200">200 / trang</option>
-            </select>
-        </div>
-
-        <div class="toolbar">
-            <div class="stats">
-                Tổng: <span id="totalAccounts">0</span> tài khoản
-                <span style="color:#888;font-weight:400;margin-left:8px;">
-                    Hiển thị: <span id="displayRange">0-0</span>
+            <div style="display:flex;gap:6px;">
+                <span style="font-size:0.7rem;color:var(--text-secondary);" id="statusBadge">
+                    <i class="fas fa-circle" style="color:var(--green);font-size:0.5rem;"></i> Online
                 </span>
             </div>
-            <div class="btn-group">
-                <label class="btn btn-upload">
-                    <i class="fas fa-upload"></i> Tải file
-                    <input type="file" id="fileInput" accept=".txt" />
-                </label>
-                <button class="btn btn-sync" id="syncBtn">
-                    <i class="fas fa-cloud-upload-alt"></i> Đồng bộ
-                </button>
-                <button class="btn btn-retry" id="retryBtn">
-                    <i class="fas fa-sync"></i> Kết nối lại
-                </button>
-                <button class="btn btn-clear" id="clearBtn">
-                    <i class="fas fa-trash-alt"></i> Xóa all
-                </button>
-            </div>
         </div>
-
-        <!-- Account List with Virtual Scroll -->
-        <div class="account-list-container" id="listContainer">
-            <div class="account-list-inner" id="listInner" style="position:relative;">
-                <div class="loading-overlay" id="loadingOverlay">
-                    <div class="loading-spinner"></div>
-                    <span>Đang tải dữ liệu...</span>
-                </div>
-                <div id="accountList"></div>
-            </div>
-        </div>
-
-        <!-- Pagination -->
-        <div class="pagination" id="pagination">
-            <button class="btn-page" id="prevPage" disabled>
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <span class="page-info" id="pageInfo">Trang 1 / 1</span>
-            <button class="btn-page" id="nextPage" disabled>
-                <i class="fas fa-chevron-right"></i>
-            </button>
+        <div class="header-stats">
+            <span class="stat-item"><i class="fas fa-users"></i> Tổng: <b id="totalCount">0</b></span>
+            <span class="stat-item stat-active"><i class="fas fa-check-circle"></i> <span id="activeCount">0</span></span>
+            <span class="stat-item stat-inactive"><i class="fas fa-times-circle"></i> <span id="inactiveCount">0</span></span>
+            <span class="stat-item stat-starred"><i class="fas fa-star"></i> <span id="starredCount">0</span></span>
         </div>
     </div>
 
-    <!-- Toast -->
+    <!-- ===== SEARCH ===== -->
+    <div class="search-section">
+        <input type="text" id="searchInput" placeholder="🔍 Tìm tài khoản..." />
+        <button class="filter-btn" id="sortBtn"><i class="fas fa-sort"></i></button>
+    </div>
+
+    <!-- ===== FILTER TABS ===== -->
+    <div class="filter-tabs" id="filterTabs">
+        <button class="tab active" data-filter="all">Tất cả <span class="badge-count" id="filterAll">0</span></button>
+        <button class="tab" data-filter="active">Hoạt động <span class="badge-count" id="filterActive">0</span></button>
+        <button class="tab" data-filter="inactive">Sai MK <span class="badge-count" id="filterInactive">0</span></button>
+        <button class="tab" data-filter="starred">⭐ Yêu thích <span class="badge-count" id="filterStarred">0</span></button>
+    </div>
+
+    <!-- ===== TOOLBAR ===== -->
+    <div class="toolbar">
+        <label class="btn btn-primary"><i class="fas fa-upload"></i> Tải file <input type="file" id="fileInput" accept=".txt" /></label>
+        <button class="btn btn-success" id="syncBtn"><i class="fas fa-cloud-upload-alt"></i> Đồng bộ</button>
+        <button class="btn btn-info" id="retryBtn"><i class="fas fa-sync"></i> Kết nối</button>
+        <button class="btn btn-danger" id="clearBtn"><i class="fas fa-trash"></i> Xóa all</button>
+    </div>
+
+    <!-- ===== LIST ===== -->
+    <div class="list-container" id="listContainer">
+        <div id="accountList">
+            <div class="loading-spinner"><div class="spinner"></div></div>
+        </div>
+    </div>
+
+    <!-- ===== PAGINATION ===== -->
+    <div class="pagination" id="pagination">
+        <button class="btn-page" id="prevPage" disabled><i class="fas fa-chevron-left"></i></button>
+        <span class="page-info" id="pageInfo">Trang 1</span>
+        <button class="btn-page" id="nextPage" disabled><i class="fas fa-chevron-right"></i></button>
+    </div>
+
+    <!-- ===== BOTTOM NAV ===== -->
+    <div class="bottom-nav">
+        <button class="nav-item active" id="navAll"><i class="fas fa-list"></i> Tất cả</button>
+        <button class="nav-item" id="navActive"><i class="fas fa-check-circle" style="color:var(--green);"></i> Hoạt động</button>
+        <button class="nav-item" id="navInactive"><i class="fas fa-times-circle" style="color:var(--red);"></i> Sai MK</button>
+        <button class="nav-item" id="navStarred"><i class="fas fa-star" style="color:var(--gold);"></i> Yêu thích</button>
+        <button class="nav-item" id="navAdd"><i class="fas fa-plus-circle" style="color:var(--blue);"></i> Thêm</button>
+    </div>
+
+    <!-- ===== TOAST ===== -->
     <div id="toast" class="toast">✅ Đã sao chép!</div>
 
     <script>
-        // ==================== FIREBASE CONFIG ====================
+        // ===== FIREBASE CONFIG =====
         const firebaseConfig = {
             apiKey: "AIzaSyCCPZvTZd1RKGaZxpKJWiCQb4JvqjA7l-U",
             authDomain: "bao-code-accounts.firebaseapp.com",
@@ -580,163 +739,135 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // ==================== MAIN APP ====================
+        // ===== MAIN APP =====
         document.addEventListener('DOMContentLoaded', function() {
+            // DOM refs
+            const $ = id => document.getElementById(id);
+            const accountList = $('accountList');
+            const searchInput = $('searchInput');
+            const fileInput = $('fileInput');
+            const syncBtn = $('syncBtn');
+            const clearBtn = $('clearBtn');
+            const retryBtn = $('retryBtn');
+            const sortBtn = $('sortBtn');
+            const prevPage = $('prevPage');
+            const nextPage = $('nextPage');
+            const pageInfo = $('pageInfo');
+            const toast = $('toast');
+            const filterTabs = document.querySelectorAll('.tab');
+            const navItems = document.querySelectorAll('.nav-item');
 
-            // DOM elements
-            const fileInput = document.getElementById('fileInput');
-            const accountList = document.getElementById('accountList');
-            const listContainer = document.getElementById('listContainer');
-            const listInner = document.getElementById('listInner');
-            const totalSpan = document.getElementById('totalAccounts');
-            const displayRange = document.getElementById('displayRange');
-            const toast = document.getElementById('toast');
-            const statusBadge = document.getElementById('statusBadge');
-            const lastUpdate = document.getElementById('lastUpdate');
-            const syncBtn = document.getElementById('syncBtn');
-            const clearBtn = document.getElementById('clearBtn');
-            const retryBtn = document.getElementById('retryBtn');
-            const searchInput = document.getElementById('searchInput');
-            const pageSizeSelect = document.getElementById('pageSizeSelect');
-            const prevPage = document.getElementById('prevPage');
-            const nextPage = document.getElementById('nextPage');
-            const pageInfo = document.getElementById('pageInfo');
-            const loadingOverlay = document.getElementById('loadingOverlay');
+            // Stats
+            const totalCount = $('totalCount');
+            const activeCount = $('activeCount');
+            const inactiveCount = $('inactiveCount');
+            const starredCount = $('starredCount');
+            const filterAll = $('filterAll');
+            const filterActive = $('filterActive');
+            const filterInactive = $('filterInactive');
+            const filterStarred = $('filterStarred');
 
-            let toastTimeout = null;
             let allAccounts = [];
             let filteredAccounts = [];
             let currentPage = 1;
-            let pageSize = 50;
-            let isSyncing = false;
+            let pageSize = 30;
+            let currentFilter = 'all';
+            let sortOrder = 'newest';
             let unsubscribeListener = null;
             let isFirstLoad = true;
+            let isSyncing = false;
 
-            // ==================== UTILITY FUNCTIONS ====================
-            function showToast(message, type = 'success') {
-                toast.textContent = message;
-                toast.className = 'toast';
-                if (type === 'error') toast.classList.add('error');
-                if (type === 'warning') toast.classList.add('warning');
+            // ===== TOAST =====
+            function showToast(msg, type = 'success') {
+                toast.textContent = msg;
+                toast.className = 'toast ' + type;
                 toast.classList.add('show');
-                clearTimeout(toastTimeout);
-                toastTimeout = setTimeout(() => {
-                    toast.classList.remove('show');
-                }, 2500);
+                clearTimeout(toast._timer);
+                toast._timer = setTimeout(() => toast.classList.remove('show'), 2000);
             }
 
-            function escapeHtml(text) {
-                if (!text) return '';
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-
-            function formatDate(timestamp) {
-                if (!timestamp) return '--';
-                const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-                return date.toLocaleString('vi-VN');
-            }
-
-            // ==================== COPY FUNCTIONS ====================
-            function copyText(text, btnElement) {
-                const copyFn = () => {
-                    const originalHtml = btnElement.innerHTML;
-                    btnElement.classList.add('copied');
-                    btnElement.innerHTML = '<i class="fas fa-check"></i> OK';
+            // ===== COPY =====
+            function copyText(text, btn) {
+                const cb = () => {
+                    const orig = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-check"></i>';
                     showToast('✅ Đã copy: ' + text);
-                    setTimeout(() => {
-                        btnElement.classList.remove('copied');
-                        btnElement.innerHTML = originalHtml;
-                    }, 1500);
+                    setTimeout(() => btn.innerHTML = orig, 1000);
                 };
-
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(text).then(copyFn).catch(() => fallbackCopy(text, copyFn));
+                if (navigator.clipboard?.writeText) {
+                    navigator.clipboard.writeText(text).then(cb).catch(() => fallbackCopy(text, cb));
                 } else {
-                    fallbackCopy(text, copyFn);
+                    fallbackCopy(text, cb);
                 }
             }
 
-            function fallbackCopy(text, callback) {
-                const textarea = document.createElement('textarea');
-                textarea.value = text;
-                textarea.style.position = 'fixed';
-                textarea.style.opacity = '0';
-                document.body.appendChild(textarea);
-                textarea.select();
-                try {
-                    document.execCommand('copy');
-                    callback();
-                } catch (err) {
-                    showToast('❌ Không thể sao chép!', 'error');
-                }
-                document.body.removeChild(textarea);
+            function fallbackCopy(text, cb) {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.cssText = 'position:fixed;opacity:0';
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); cb(); } catch(e) { showToast('❌ Không copy được!', 'error'); }
+                document.body.removeChild(ta);
             }
 
-            // ==================== PARSE FILE ====================
+            // ===== PARSE FILE =====
             function parseAccounts(text) {
                 const lines = text.split(/\r?\n/);
-                const accounts = [];
-
+                const result = [];
                 for (let line of lines) {
                     line = line.trim();
                     if (!line) continue;
-
                     const parts = line.split('|').map(s => s.trim());
                     if (parts.length >= 2) {
                         let username = parts[0] || '';
                         let password = parts[1] || '';
                         let level = parts.length >= 3 ? parts[2] : '';
-
                         if (!level && parts.length >= 2) {
-                            const combined = parts.slice(1).join(' ');
-                            const match = combined.match(/LEVEL\s*:\s*(.+)/i);
-                            if (match) {
-                                password = parts[1] || '';
-                                level = match[1].trim();
-                            }
+                            const match = parts.slice(1).join(' ').match(/LEVEL\s*:\s*(.+)/i);
+                            if (match) { password = parts[1] || ''; level = match[1].trim(); }
                         }
-
                         if (password.toLowerCase().includes('level')) {
                             const pwParts = password.split(/\s*LEVEL\s*:\s*/i);
-                            if (pwParts.length >= 2) {
-                                password = pwParts[0].trim();
-                                if (!level) level = pwParts[1].trim();
-                            }
+                            if (pwParts.length >= 2) { password = pwParts[0].trim(); if (!level) level = pwParts[1].trim(); }
                         }
-
-                        accounts.push({
-                            username: username,
-                            password: password,
-                            level: level || '?',
+                        result.push({
+                            username, password, level: level || '?',
+                            status: 'active',
+                            starred: false,
+                            note: '',
                             createdAt: new Date()
                         });
                     }
                 }
-
-                return accounts;
+                return result;
             }
 
-            // ==================== RENDER WITH VIRTUAL SCROLL ====================
+            // ===== RENDER =====
             function renderAccounts(accounts) {
                 const total = accounts.length;
-                const totalPages = Math.ceil(total / pageSize) || 1;
-                
-                // Điều chỉnh trang hiện tại
+                const totalPages = Math.max(1, Math.ceil(total / pageSize));
                 if (currentPage > totalPages) currentPage = totalPages;
                 if (currentPage < 1) currentPage = 1;
 
                 const start = (currentPage - 1) * pageSize;
                 const end = Math.min(start + pageSize, total);
-                const pageAccounts = accounts.slice(start, end);
+                const pageData = accounts.slice(start, end);
 
-                // Cập nhật thông tin
-                totalSpan.textContent = allAccounts.length;
-                displayRange.textContent = total > 0 ? `${start + 1}-${end}` : '0-0';
-                pageInfo.textContent = `Trang ${currentPage} / ${totalPages}`;
+                // Update stats
+                const active = allAccounts.filter(a => a.status === 'active').length;
+                const inactive = allAccounts.filter(a => a.status === 'inactive').length;
+                const starred = allAccounts.filter(a => a.starred).length;
+                totalCount.textContent = allAccounts.length;
+                activeCount.textContent = active;
+                inactiveCount.textContent = inactive;
+                starredCount.textContent = starred;
+                filterAll.textContent = allAccounts.length;
+                filterActive.textContent = active;
+                filterInactive.textContent = inactive;
+                filterStarred.textContent = starred;
 
-                // Cập nhật nút phân trang
+                pageInfo.textContent = `Trang ${currentPage}/${totalPages}`;
                 prevPage.disabled = currentPage <= 1;
                 nextPage.disabled = currentPage >= totalPages;
 
@@ -744,131 +875,188 @@
                     accountList.innerHTML = `
                         <div class="empty-state">
                             <i class="fas fa-inbox"></i>
-                            <p>${allAccounts.length === 0 ? 'Chưa có tài khoản nào.' : 'Không tìm thấy kết quả.'}</p>
+                            <p>${allAccounts.length === 0 ? 'Chưa có tài khoản nào' : 'Không tìm thấy kết quả'}</p>
+                            <p style="font-size:0.7rem;color:#444;margin-top:4px;">Tải file .txt để thêm tài khoản</p>
                         </div>
                     `;
-                    loadingOverlay.classList.add('hidden');
                     return;
                 }
 
-                // Render với vị trí tuyệt đối để virtual scroll
                 let html = '';
-                const itemHeight = 68; // Chiều cao gần đúng của mỗi item
-
-                pageAccounts.forEach((acc, index) => {
-                    const globalIndex = start + index;
-                    let levelDisplay = acc.level || '?';
-                    if (levelDisplay.toLowerCase().includes('level')) {
-                        const parts = levelDisplay.split(':');
-                        levelDisplay = parts.length > 1 ? parts[1].trim() : levelDisplay.trim();
-                    }
-
-                    const docId = acc.id || `local-${globalIndex}`;
+                pageData.forEach((acc, idx) => {
+                    const globalIdx = start + idx;
+                    const levelDisplay = acc.level?.replace(/LEVEL\s*:\s*/i, '').trim() || '?';
+                    const isStarred = acc.starred;
+                    const isActive = acc.status === 'active';
 
                     html += `
-                        <div class="account-card" data-id="${docId}" style="top:${index * itemHeight}px; height:${itemHeight - 4}px;">
-                            <div class="account-info">
-                                <div class="field">
-                                    <span class="label">TK</span>
-                                    <span class="value username">${escapeHtml(acc.username)}</span>
+                        <div class="account-item" data-id="${acc.id || globalIdx}">
+                            <div class="main-row">
+                                <div class="avatar">
+                                    <i class="fas fa-user${isActive ? '' : '-slash'}" style="color:${isActive ? 'var(--green)' : 'var(--red)'};"></i>
                                 </div>
-                                <div class="field">
-                                    <span class="label">MK</span>
-                                    <span class="value password">${escapeHtml(acc.password)}</span>
+                                <div class="info">
+                                    <div class="username">${escapeHtml(acc.username)}</div>
+                                    <div class="password">${escapeHtml(acc.password)}</div>
+                                    <div class="meta">
+                                        <span class="tag level"><i class="fas fa-star"></i> ${escapeHtml(levelDisplay)}</span>
+                                        <span class="tag ${isActive ? 'status-active' : 'status-inactive'}">
+                                            <i class="fas fa-${isActive ? 'check' : 'times'}-circle"></i> ${isActive ? 'Hoạt động' : 'Sai MK'}
+                                        </span>
+                                        ${isStarred ? '<span class="tag starred"><i class="fas fa-star"></i> Yêu thích</span>' : ''}
+                                        ${acc.note ? `<span class="tag"><i class="fas fa-pen"></i> ${escapeHtml(acc.note)}</span>` : ''}
+                                    </div>
                                 </div>
-                                <div class="field">
-                                    <span class="label">LV</span>
-                                    <span class="value level">${escapeHtml(levelDisplay)}</span>
+                                <div class="actions">
+                                    <button class="btn-icon star ${isStarred ? 'active' : ''}" onclick="toggleStar('${acc.id || globalIdx}')">
+                                        <i class="fas fa-star"></i>
+                                    </button>
+                                    <button class="btn-icon status-toggle ${isActive ? 'active-status' : 'inactive-status'}" onclick="toggleStatus('${acc.id || globalIdx}')">
+                                        <i class="fas fa-${isActive ? 'check' : 'times'}"></i>
+                                    </button>
+                                    <button class="btn-icon copy" onclick="copyText('${escapeHtml(acc.username)}', this)">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <button class="btn-icon" onclick="toggleExpand(this)">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
                                 </div>
                             </div>
-                            <div class="account-actions">
-                                <button class="btn-copy copy-tk" data-username="${escapeHtml(acc.username)}">
-                                    <i class="fas fa-copy"></i> TK
-                                </button>
-                                <button class="btn-copy copy-mk" data-password="${escapeHtml(acc.password)}">
-                                    <i class="fas fa-copy"></i> MK
-                                </button>
-                                <button class="btn-copy copy-all" data-username="${escapeHtml(acc.username)}" data-password="${escapeHtml(acc.password)}">
-                                    <i class="fas fa-copy"></i> All
-                                </button>
-                                ${docId && !docId.startsWith('local-') ? `
-                                    <button class="btn-delete delete-account" data-id="${docId}">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                ` : ''}
+                            <div class="expand-row">
+                                <button class="btn-sm" onclick="copyText('${escapeHtml(acc.username)}', this)"><i class="fas fa-user"></i> TK</button>
+                                <button class="btn-sm" onclick="copyText('${escapeHtml(acc.password)}', this)"><i class="fas fa-lock"></i> MK</button>
+                                <button class="btn-sm" onclick="copyText('${escapeHtml(acc.username)} | ${escapeHtml(acc.password)}', this)"><i class="fas fa-copy"></i> All</button>
+                                <button class="btn-sm" onclick="editNote('${acc.id || globalIdx}')"><i class="fas fa-pen"></i> Ghi chú</button>
+                                ${acc.id && !String(acc.id).startsWith('local-') ? 
+                                    `<button class="btn-sm danger" onclick="deleteAccount('${acc.id}')"><i class="fas fa-trash"></i> Xóa</button>` : 
+                                    `<button class="btn-sm danger" onclick="removeLocal('${acc.id || globalIdx}')"><i class="fas fa-trash"></i> Xóa</button>`
+                                }
                             </div>
                         </div>
                     `;
                 });
 
-                // Đặt chiều cao cho container
-                listInner.style.height = `${pageAccounts.length * itemHeight + 10}px`;
                 accountList.innerHTML = html;
-
-                // Gắn sự kiện
-                document.querySelectorAll('.copy-tk').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        copyText(this.getAttribute('data-username'), this);
-                    });
-                });
-
-                document.querySelectorAll('.copy-mk').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        copyText(this.getAttribute('data-password'), this);
-                    });
-                });
-
-                document.querySelectorAll('.copy-all').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        const username = this.getAttribute('data-username');
-                        const password = this.getAttribute('data-password');
-                        copyText(`${username} | ${password}`, this);
-                    });
-                });
-
-                document.querySelectorAll('.delete-account').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        const id = this.getAttribute('data-id');
-                        if (confirm('Xóa tài khoản này?')) {
-                            deleteAccount(id);
-                        }
-                    });
-                });
-
-                loadingOverlay.classList.add('hidden');
             }
 
-            // ==================== FILTER AND SEARCH ====================
+            function escapeHtml(text) {
+                if (!text) return '';
+                const d = document.createElement('div');
+                d.textContent = text;
+                return d.innerHTML;
+            }
+
+            // ===== TOGGLE FUNCTIONS =====
+            window.toggleStar = function(id) {
+                const acc = findAccount(id);
+                if (!acc) return;
+                acc.starred = !acc.starred;
+                updateAccount(id, { starred: acc.starred });
+                applyFilters();
+                showToast(acc.starred ? '⭐ Đã thêm yêu thích' : '⭐ Bỏ yêu thích');
+            };
+
+            window.toggleStatus = function(id) {
+                const acc = findAccount(id);
+                if (!acc) return;
+                acc.status = acc.status === 'active' ? 'inactive' : 'active';
+                updateAccount(id, { status: acc.status });
+                applyFilters();
+                showToast(acc.status === 'active' ? '✅ Đã kích hoạt' : '❌ Đã đánh dấu sai MK');
+            };
+
+            window.toggleExpand = function(btn) {
+                const row = btn.closest('.account-item').querySelector('.expand-row');
+                row.classList.toggle('open');
+                btn.querySelector('i').classList.toggle('fa-chevron-down');
+                btn.querySelector('i').classList.toggle('fa-chevron-up');
+            };
+
+            window.editNote = function(id) {
+                const acc = findAccount(id);
+                if (!acc) return;
+                const note = prompt('Nhập ghi chú cho tài khoản:', acc.note || '');
+                if (note !== null) {
+                    acc.note = note.trim();
+                    updateAccount(id, { note: acc.note });
+                    applyFilters();
+                    showToast('📝 Đã cập nhật ghi chú');
+                }
+            };
+
+            window.deleteAccount = async function(id) {
+                if (!confirm('Xóa tài khoản này?')) return;
+                try {
+                    await db.collection('accounts').doc(id).delete();
+                    showToast('🗑️ Đã xóa!');
+                } catch(e) {
+                    showToast('❌ Lỗi xóa!', 'error');
+                }
+            };
+
+            window.removeLocal = function(id) {
+                if (!confirm('Xóa tài khoản này?')) return;
+                const idx = allAccounts.findIndex(a => (a.id || a._idx) === id);
+                if (idx > -1) {
+                    allAccounts.splice(idx, 1);
+                    applyFilters();
+                    showToast('🗑️ Đã xóa!');
+                }
+            };
+
+            function findAccount(id) {
+                return allAccounts.find(a => (a.id || a._idx) === id);
+            }
+
+            function updateAccount(id, data) {
+                const acc = findAccount(id);
+                if (acc) Object.assign(acc, data);
+                // Nếu có ID thật, update lên Firebase
+                if (acc && acc.id && !String(acc.id).startsWith('local-')) {
+                    db.collection('accounts').doc(acc.id).update(data).catch(() => {});
+                }
+            }
+
+            // ===== FILTER & SEARCH =====
             function applyFilters() {
-                const searchTerm = searchInput.value.toLowerCase().trim();
-                
-                if (!searchTerm) {
-                    filteredAccounts = [...allAccounts];
-                } else {
-                    filteredAccounts = allAccounts.filter(acc => 
-                        acc.username.toLowerCase().includes(searchTerm) ||
-                        acc.password.toLowerCase().includes(searchTerm) ||
-                        (acc.level && acc.level.toLowerCase().includes(searchTerm))
+                const search = searchInput.value.toLowerCase().trim();
+                let result = [...allAccounts];
+
+                // Filter
+                if (currentFilter === 'active') result = result.filter(a => a.status === 'active');
+                else if (currentFilter === 'inactive') result = result.filter(a => a.status === 'inactive');
+                else if (currentFilter === 'starred') result = result.filter(a => a.starred);
+
+                // Search
+                if (search) {
+                    result = result.filter(a => 
+                        a.username.toLowerCase().includes(search) ||
+                        a.password.toLowerCase().includes(search) ||
+                        (a.level && a.level.toLowerCase().includes(search)) ||
+                        (a.note && a.note.toLowerCase().includes(search))
                     );
                 }
 
+                // Sort
+                if (sortOrder === 'newest') {
+                    result.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                } else if (sortOrder === 'oldest') {
+                    result.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+                } else if (sortOrder === 'username') {
+                    result.sort((a, b) => a.username.localeCompare(b.username));
+                }
+
+                filteredAccounts = result;
                 currentPage = 1;
                 renderAccounts(filteredAccounts);
             }
 
-            // ==================== FIREBASE OPERATIONS ====================
-
-            function setupFirestoreListener() {
+            // ===== FIREBASE =====
+            function setupListener() {
                 if (unsubscribeListener) {
                     unsubscribeListener();
                     unsubscribeListener = null;
                 }
-
-                loadingOverlay.classList.remove('hidden');
 
                 try {
                     db.disableNetwork().catch(() => {});
@@ -878,87 +1066,96 @@
                         .orderBy('createdAt', 'desc')
                         .onSnapshot((snapshot) => {
                             const accounts = [];
-                            snapshot.forEach((doc) => {
+                            snapshot.forEach(doc => {
                                 const data = doc.data();
                                 accounts.push({
                                     id: doc.id,
                                     username: data.username || '',
                                     password: data.password || '',
                                     level: data.level || '?',
+                                    status: data.status || 'active',
+                                    starred: data.starred || false,
+                                    note: data.note || '',
                                     createdAt: data.createdAt
                                 });
                             });
-
-                            allAccounts = accounts;
+                            // Merge với dữ liệu local (nếu có)
+                            const localIds = new Set();
+                            allAccounts.forEach(a => {
+                                if (a.id && !String(a.id).startsWith('local-')) localIds.add(a.id);
+                            });
+                            // Giữ lại local accounts chưa có trên Firebase
+                            const keepLocal = allAccounts.filter(a => 
+                                a.id && String(a.id).startsWith('local-')
+                            );
+                            allAccounts = [...accounts, ...keepLocal];
+                            // Gán _idx cho local
+                            allAccounts.forEach((a, i) => {
+                                if (!a.id) a._idx = `local-${i}`;
+                            });
                             applyFilters();
-                            updateStatus(true);
-                            
-                            if (accounts.length > 0) {
-                                lastUpdate.textContent = formatDate(accounts[0].createdAt);
-                            } else {
-                                lastUpdate.textContent = '--';
-                            }
-
+                            document.getElementById('statusBadge').innerHTML = 
+                                '<i class="fas fa-circle" style="color:var(--green);font-size:0.5rem;"></i> Online';
                             if (isFirstLoad) {
                                 isFirstLoad = false;
-                                showToast(`📥 Đã tải ${accounts.length} tài khoản`, 'success');
+                                showToast(`📥 Đã tải ${accounts.length} tài khoản`);
                             }
                         }, (error) => {
                             console.error('Firebase error:', error);
-                            updateStatus(false);
+                            document.getElementById('statusBadge').innerHTML = 
+                                '<i class="fas fa-circle" style="color:var(--red);font-size:0.5rem;"></i> Offline';
                             if (isFirstLoad) {
                                 isFirstLoad = false;
-                                showToast('⚠️ Không thể kết nối Firebase!', 'warning');
-                                loadingOverlay.classList.add('hidden');
+                                showToast('⚠️ Mất kết nối Firebase!', 'warning');
+                                renderAccounts([]);
                             }
                         });
 
-                } catch (error) {
-                    console.error('Setup error:', error);
-                    updateStatus(false);
-                    loadingOverlay.classList.add('hidden');
+                } catch(e) {
+                    console.error('Setup error:', e);
                 }
             }
 
             async function uploadToFirebase(accounts) {
                 if (isSyncing) return;
-                if (!accounts || accounts.length === 0) {
-                    showToast('⚠️ Không có tài khoản để đồng bộ!', 'warning');
+                if (!accounts?.length) {
+                    showToast('⚠️ Không có tài khoản!', 'warning');
                     return;
                 }
 
                 isSyncing = true;
                 syncBtn.disabled = true;
-                syncBtn.innerHTML = '<div class="loading-spinner" style="width:16px;height:16px;"></div>';
+                syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
                 try {
                     const batch = db.batch();
                     const colRef = db.collection('accounts');
-
                     const snapshot = await colRef.get();
-                    snapshot.forEach((doc) => batch.delete(doc.ref));
+                    snapshot.forEach(doc => batch.delete(doc.ref));
 
-                    accounts.forEach((acc) => {
+                    accounts.forEach(acc => {
                         const newDoc = colRef.doc();
                         batch.set(newDoc, {
                             username: acc.username,
                             password: acc.password,
                             level: acc.level || '?',
+                            status: acc.status || 'active',
+                            starred: acc.starred || false,
+                            note: acc.note || '',
                             createdAt: firebase.firestore.FieldValue.serverTimestamp()
                         });
                     });
 
                     await batch.commit();
-                    showToast(`✅ Đã đồng bộ ${accounts.length} tài khoản!`, 'success');
-                    
+                    showToast(`✅ Đã đồng bộ ${accounts.length} tài khoản!`);
                     if (unsubscribeListener) {
                         unsubscribeListener();
                         unsubscribeListener = null;
                     }
-                    setupFirestoreListener();
+                    setupListener();
 
-                } catch (error) {
-                    console.error('Upload error:', error);
+                } catch(e) {
+                    console.error('Upload error:', e);
                     showToast('❌ Lỗi đồng bộ!', 'error');
                 } finally {
                     isSyncing = false;
@@ -967,71 +1164,50 @@
                 }
             }
 
-            async function deleteAccount(id) {
-                try {
-                    await db.collection('accounts').doc(id).delete();
-                    showToast('🗑️ Đã xóa!', 'success');
-                } catch (error) {
-                    console.error('Delete error:', error);
-                    showToast('❌ Lỗi xóa!', 'error');
-                }
-            }
-
             async function clearAllAccounts() {
-                if (!confirm('⚠️ Xóa TẤT CẢ tài khoản trên Firebase?')) return;
-
+                if (!confirm('⚠️ Xóa TẤT CẢ tài khoản?')) return;
                 try {
                     const snapshot = await db.collection('accounts').get();
                     const batch = db.batch();
-                    snapshot.forEach((doc) => batch.delete(doc.ref));
+                    snapshot.forEach(doc => batch.delete(doc.ref));
                     await batch.commit();
-                    showToast('🗑️ Đã xóa tất cả!', 'success');
-                } catch (error) {
-                    console.error('Clear error:', error);
+                    // Xóa cả local
+                    allAccounts = allAccounts.filter(a => a.id && String(a.id).startsWith('local-'));
+                    applyFilters();
+                    showToast('🗑️ Đã xóa tất cả!');
+                } catch(e) {
                     showToast('❌ Lỗi xóa!', 'error');
                 }
             }
 
             function retryConnection() {
                 showToast('🔄 Đang kết nối lại...', 'warning');
-                updateStatus(false);
-                
                 if (unsubscribeListener) {
                     unsubscribeListener();
                     unsubscribeListener = null;
                 }
-
                 db.disableNetwork().then(() => db.enableNetwork())
-                    .then(() => {
-                        setupFirestoreListener();
-                        showToast('✅ Đã kết nối lại!', 'success');
-                    })
-                    .catch((error) => {
-                        console.error('Retry error:', error);
-                        showToast('❌ Không thể kết nối!', 'error');
-                        updateStatus(false);
-                        loadingOverlay.classList.add('hidden');
-                    });
+                    .then(() => { setupListener(); showToast('✅ Đã kết nối!'); })
+                    .catch(() => { showToast('❌ Không kết nối được!', 'error'); });
             }
 
-            function updateStatus(online) {
-                statusBadge.textContent = online ? 'Đang kết nối' : 'Mất kết nối';
-                statusBadge.className = `badge ${online ? 'online' : 'offline'}`;
-            }
-
-            // ==================== EVENT LISTENERS ====================
+            // ===== EVENT LISTENERS =====
+            // Search
+            searchInput.addEventListener('input', applyFilters);
 
             // File upload
             fileInput.addEventListener('change', function(e) {
                 const file = this.files[0];
                 if (!file) return;
-
                 const reader = new FileReader();
                 reader.onload = function(ev) {
                     const accounts = parseAccounts(ev.target.result);
                     if (accounts.length > 0) {
-                        showToast(`📄 Đã đọc ${accounts.length} tài khoản`, 'success');
-                        uploadToFirebase(accounts);
+                        showToast(`📄 Đã đọc ${accounts.length} tài khoản`);
+                        // Gán ID local
+                        accounts.forEach((a, i) => a._idx = `local-${Date.now()}-${i}`);
+                        allAccounts = [...allAccounts, ...accounts];
+                        uploadToFirebase(allAccounts.filter(a => !a.id || String(a.id).startsWith('local-')));
                     } else {
                         showToast('⚠️ Không có tài khoản hợp lệ!', 'warning');
                     }
@@ -1041,83 +1217,113 @@
                 reader.readAsText(file, 'UTF-8');
             });
 
-            // Search
-            searchInput.addEventListener('input', applyFilters);
+            // Filter tabs
+            filterTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    filterTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.dataset.filter;
+                    // Cập nhật bottom nav
+                    navItems.forEach(n => n.classList.remove('active'));
+                    const navMap = { all: 'navAll', active: 'navActive', inactive: 'navInactive', starred: 'navStarred' };
+                    const navId = navMap[currentFilter];
+                    if (navId) document.getElementById(navId)?.classList.add('active');
+                    applyFilters();
+                });
+            });
 
-            // Page size
-            pageSizeSelect.addEventListener('change', function() {
-                pageSize = parseInt(this.value);
-                currentPage = 1;
-                renderAccounts(filteredAccounts);
+            // Bottom nav
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const map = {
+                        'navAll': 'all', 'navActive': 'active', 
+                        'navInactive': 'inactive', 'navStarred': 'starred'
+                    };
+                    const filter = map[this.id];
+                    if (filter) {
+                        filterTabs.forEach(t => t.classList.remove('active'));
+                        document.querySelector(`.tab[data-filter="${filter}"]`)?.classList.add('active');
+                        currentFilter = filter;
+                        navItems.forEach(n => n.classList.remove('active'));
+                        this.classList.add('active');
+                        applyFilters();
+                    }
+                    if (this.id === 'navAdd') {
+                        // Thêm tài khoản mới
+                        const user = prompt('Nhập tài khoản:');
+                        if (user) {
+                            const pass = prompt('Nhập mật khẩu:');
+                            if (pass !== null) {
+                                const level = prompt('Nhập level (VD: 30):') || '?';
+                                const newAcc = {
+                                    username: user.trim(),
+                                    password: pass.trim(),
+                                    level: level.trim() || '?',
+                                    status: 'active',
+                                    starred: false,
+                                    note: '',
+                                    createdAt: new Date(),
+                                    _idx: `local-${Date.now()}`
+                                };
+                                allAccounts.push(newAcc);
+                                uploadToFirebase([newAcc]);
+                                applyFilters();
+                                showToast('✅ Đã thêm tài khoản!');
+                            }
+                        }
+                    }
+                });
+            });
+
+            // Sort
+            sortBtn.addEventListener('click', function() {
+                const orders = ['newest', 'oldest', 'username'];
+                const icons = ['fa-sort-amount-down', 'fa-sort-amount-up', 'fa-sort-alpha-down'];
+                const idx = orders.indexOf(sortOrder);
+                const nextIdx = (idx + 1) % orders.length;
+                sortOrder = orders[nextIdx];
+                this.innerHTML = `<i class="fas ${icons[nextIdx]}"></i>`;
+                applyFilters();
             });
 
             // Pagination
             prevPage.addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    renderAccounts(filteredAccounts);
-                    listContainer.scrollTop = 0;
-                }
+                if (currentPage > 1) { currentPage--; renderAccounts(filteredAccounts); }
             });
-
             nextPage.addEventListener('click', () => {
                 const totalPages = Math.ceil(filteredAccounts.length / pageSize);
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    renderAccounts(filteredAccounts);
-                    listContainer.scrollTop = 0;
-                }
+                if (currentPage < totalPages) { currentPage++; renderAccounts(filteredAccounts); }
             });
 
             // Buttons
             syncBtn.addEventListener('click', () => {
                 if (allAccounts.length === 0) {
-                    showToast('⚠️ Không có tài khoản để đồng bộ!', 'warning');
+                    showToast('⚠️ Không có tài khoản!', 'warning');
                     return;
                 }
-                uploadToFirebase(allAccounts);
+                uploadToFirebase(allAccounts.filter(a => !a.id || String(a.id).startsWith('local-')));
             });
-
-            retryBtn.addEventListener('click', retryConnection);
             clearBtn.addEventListener('click', clearAllAccounts);
+            retryBtn.addEventListener('click', retryConnection);
 
-            // ==================== DRAG & DROP ====================
-            const container = document.querySelector('.container');
-            container.addEventListener('dragover', (e) => {
+            // ===== DRAG & DROP =====
+            document.querySelector('.list-container').addEventListener('dragover', e => e.preventDefault());
+            document.querySelector('.list-container').addEventListener('drop', function(e) {
                 e.preventDefault();
-                container.style.borderColor = '#ffd700';
-                container.style.borderStyle = 'dashed';
-            });
-
-            container.addEventListener('dragleave', (e) => {
-                e.preventDefault();
-                container.style.borderColor = 'rgba(255,255,255,0.08)';
-                container.style.borderStyle = 'solid';
-            });
-
-            container.addEventListener('drop', (e) => {
-                e.preventDefault();
-                container.style.borderColor = 'rgba(255,255,255,0.08)';
-                container.style.borderStyle = 'solid';
                 const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    const file = files[0];
-                    if (file.name.endsWith('.txt')) {
-                        const dt = new DataTransfer();
-                        dt.items.add(file);
-                        fileInput.files = dt.files;
-                        fileInput.dispatchEvent(new Event('change'));
-                    } else {
-                        showToast('❌ Vui lòng thả file .txt', 'error');
-                    }
+                if (files.length > 0 && files[0].name.endsWith('.txt')) {
+                    const dt = new DataTransfer();
+                    dt.items.add(files[0]);
+                    fileInput.files = dt.files;
+                    fileInput.dispatchEvent(new Event('change'));
+                } else {
+                    showToast('❌ Vui lòng thả file .txt', 'error');
                 }
             });
 
-            // ==================== INIT ====================
-            setupFirestoreListener();
-
-            console.log('✅ Firebase App ready!');
-            console.log(`📊 Hỗ trợ tối đa ${pageSize} tài khoản/trang để mượt mà`);
+            // ===== INIT =====
+            setupListener();
+            console.log('✅ App ready! Mobile optimized for 15k accounts.');
         });
     </script>
 
