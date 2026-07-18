@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Tài Khoản</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+            margin-top: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 0.95em;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .stats-item {
+            font-size: 0.95em;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .stats-item span {
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .account-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .account-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .account-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .account-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+        }
+
+        .account-item {
+            background: white;
+            border: 2px solid #e8ecf1;
+            border-radius: 12px;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .account-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.15);
+            transform: translateX(5px);
+        }
+
+        .account-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .account-number {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85em;
+            flex-shrink: 0;
+        }
+
+        .account-username {
+            font-weight: 600;
+            color: #333;
+            font-size: 1em;
+            word-break: break-all;
+        }
+
+        .account-password {
+            color: #666;
+            font-size: 0.95em;
+            word-break: break-all;
+        }
+
+        .account-divider {
+            color: #ccc;
+            font-weight: 300;
+            margin: 0 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-copy-user {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+        }
+
+        .btn-copy-pass {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            color: #333;
+        }
+
+        .btn-copy-all {
+            background: linear-gradient(135deg, #fa709a, #fee140);
+            color: #333;
+        }
+
+        .btn-upload {
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
+            color: #333;
+            padding: 10px 25px;
+            font-size: 1em;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-upload:hover {
+            background: linear-gradient(135deg, #7fdbd6, #fcc9d8);
+        }
+
+        .upload-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px dashed #e8ecf1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 12px 20px;
+            background: #f5f7fa;
+            border: 2px dashed #c3cfe2;
+            border-radius: 12px;
+            text-align: center;
+            color: #666;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-input-label:hover {
+            background: #e8ecf1;
+            border-color: #667eea;
+        }
+
+        .file-input-label i {
+            margin-right: 8px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #333;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s ease;
+            z-index: 1000;
+            max-width: 90%;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            color: #333;
+        }
+
+        .toast.error {
+            background: linear-gradient(135deg, #fa709a, #fee140);
+            color: #333;
+        }
+
+        .toast.info {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: #333;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+            font-size: 1.1em;
+        }
+
+        .empty-message i {
+            font-size: 3em;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        /* Modal/Popup */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.8em;
+            cursor: pointer;
+            color: #ccc;
+            transition: color 0.3s ease;
+            background: none;
+            border: none;
+        }
+
+        .modal-content .close-btn:hover {
+            color: #333;
+        }
+
+        .modal-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+
+        .modal-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .modal-author {
+            font-size: 1.1em;
+            color: #666;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+
+        .modal-author span {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .modal-btn {
+            margin-top: 25px;
+            padding: 12px 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .auto-load-status {
+            text-align: center;
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 500;
+            background: #f5f7fa;
+            color: #666;
+        }
+
+        .auto-load-status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .auto-load-status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .auto-load-status.loading {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+                margin-top: 10px;
+            }
+
+            h1 {
+                font-size: 1.6em;
+            }
+
+            .account-item {
+                padding: 12px 15px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .account-info {
+                min-width: 100%;
+                gap: 8px;
+            }
+
+            .button-group {
+                justify-content: stretch;
+                width: 100%;
+            }
+
+            .btn {
+                flex: 1;
+                justify-content: center;
+                padding: 8px 12px;
+                font-size: 0.8em;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 5px;
+                align-items: center;
+            }
+
+            .stats-item {
+                font-size: 0.85em;
+            }
+
+            .modal-content {
+                padding: 30px 20px;
+            }
+
+            .modal-title {
+                font-size: 1.4em;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .btn {
+                font-size: 0.7em;
+                padding: 6px 10px;
+            }
+
+            .account-username,
+            .account-password {
+                font-size: 0.85em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Modal chào mừng -->
+    <div class="modal active" id="welcomeModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <div class="modal-icon">👋</div>
+            <div class="modal-title">Chào Mừng!</div>
+            <div class="modal-author">
+                Tác giả: <span>Từ Quang Nam</span>
+            </div>
+            <p style="color: #666; margin-top: 15px; line-height: 1.6;">
+                Chào mừng bạn đến với công cụ quản lý tài khoản.<br>
+                Hệ thống sẽ tự động tải file <b>account.txt</b> cùng thư mục.
+            </p>
+            <button class="modal-btn" onclick="closeModal()">Bắt đầu</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>📋 Quản Lý Tài Khoản</h1>
+        <p class="subtitle">Tự động đọc file account.txt cùng thư mục</p>
+
+        <div id="autoLoadStatus" class="auto-load-status loading">
+            ⏳ Đang tìm file account.txt...
+        </div>
+
+        <div class="stats">
+            <div class="stats-item">📊 Tổng số: <span id="totalAccounts">0</span></div>
+            <div class="stats-item">✅ Trạng thái: <span id="loadedStatus">Đang tải...</span></div>
+        </div>
+
+        <div id="accountList" class="account-list">
+            <div class="empty-message">
+                <span style="font-size: 3em; display: block; margin-bottom: 15px;">⏳</span>
+                Đang tải dữ liệu...
+            </div>
+        </div>
+
+        <div class="upload-section">
+            <div class="file-input-wrapper">
+                <input type="file" id="fileInput" accept=".txt" onchange="handleFileUpload(event)">
+                <div class="file-input-label">
+                    📤 Hoặc tải file account.txt thủ công
+                </div>
+            </div>
+            <button class="btn btn-upload" onclick="reloadAccountFile()">
+                🔄 Tải lại file account.txt
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Dữ liệu tài khoản
+        let accounts = [];
+        let isFirstLoad = true;
+
+        // Hàm đọc file account.txt từ cùng thư mục
+        async function loadAccountFile() {
+            const statusEl = document.getElementById('autoLoadStatus');
+            const listContainer = document.getElementById('accountList');
+            
+            try {
+                statusEl.className = 'auto-load-status loading';
+                statusEl.textContent = '⏳ Đang đọc file account.txt...';
+                
+                // Thử đọc file account.txt từ cùng thư mục
+                const response = await fetch('account.txt', {
+                    cache: 'no-store' // Tránh cache
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Không tìm thấy file account.txt');
+                }
+                
+                const content = await response.text();
+                
+                if (!content.trim()) {
+                    throw new Error('File account.txt trống');
+                }
+                
+                // Parse dữ liệu
+                const lines = content.split('\n').filter(line => line.trim() !== '');
+                accounts = lines.map(line => {
+                    const parts = line.split('|');
+                    return {
+                        username: parts[0]?.trim() || '',
+                        password: parts[1]?.trim() || ''
+                    };
+                }).filter(acc => acc.username && acc.password);
+                
+                if (accounts.length === 0) {
+                    throw new Error('Không tìm thấy tài khoản hợp lệ');
+                }
+                
+                statusEl.className = 'auto-load-status success';
+                statusEl.textContent = `✅ Đã tải thành công ${accounts.length} tài khoản từ account.txt`;
+                
+                renderAccounts();
+                showToast(`Đã tải ${accounts.length} tài khoản từ account.txt`, 'success');
+                
+            } catch (error) {
+                console.error('Lỗi tải file:', error);
+                
+                statusEl.className = 'auto-load-status error';
+                statusEl.textContent = '❌ Không tìm thấy file account.txt. Vui lòng tải lên thủ công.';
+                
+                // Hiển thị hướng dẫn
+                listContainer.innerHTML = `
+                    <div class="empty-message">
+                        <span style="font-size: 3em; display: block; margin-bottom: 15px;">📂</span>
+                        <strong>Không tìm thấy file account.txt</strong><br><br>
+                        Vui lòng:<br>
+                        1. Tạo file <b>account.txt</b> cùng thư mục với file HTML<br>
+                        2. Hoặc tải file lên bằng nút bên dưới<br><br>
+                        <span style="font-size: 0.9em; color: #999;">
+                            Định dạng: tài khoản|mật khẩu
+                        </span>
+                    </div>
+                `;
+                
+                document.getElementById('totalAccounts').textContent = '0';
+                document.getElementById('loadedStatus').textContent = '❌ Chưa có dữ liệu';
+            }
+        }
+
+        // Xử lý upload file thủ công
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    const lines = content.split('\n').filter(line => line.trim() !== '');
+                    
+                    accounts = lines.map(line => {
+                        const parts = line.split('|');
+                        return {
+                            username: parts[0]?.trim() || '',
+                            password: parts[1]?.trim() || ''
+                        };
+                    }).filter(acc => acc.username && acc.password);
+
+                    if (accounts.length === 0) {
+                        showToast('Không tìm thấy tài khoản hợp lệ trong file!', 'error');
+                        return;
+                    }
+
+                    renderAccounts();
+                    
+                    // Cập nhật status
+                    const statusEl = document.getElementById('autoLoadStatus');
+                    statusEl.className = 'auto-load-status success';
+                    statusEl.textContent = `✅ Đã tải ${accounts.length} tài khoản (thủ công)`;
+                    
+                    showToast(`Đã tải thành công ${accounts.length} tài khoản!`, 'success');
+                } catch (error) {
+                    showToast('Lỗi đọc file! Vui lòng kiểm tra định dạng.', 'error');
+                    console.error(error);
+                }
+            };
+
+            reader.readAsText(file, 'UTF-8');
+            // Reset input để có thể upload lại cùng file
+            event.target.value = '';
+        }
+
+        // Tải lại file account.txt
+        function reloadAccountFile() {
+            loadAccountFile();
+        }
+
+        // Hiển thị danh sách tài khoản
+        function renderAccounts() {
+            const listContainer = document.getElementById('accountList');
+            const totalSpan = document.getElementById('totalAccounts');
+            const statusSpan = document.getElementById('loadedStatus');
+
+            if (accounts.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="empty-message">
+                        <span style="font-size: 3em; display: block; margin-bottom: 15px;">📂</span>
+                        Chưa có dữ liệu. Vui lòng tải file account.txt
+                    </div>
+                `;
+                totalSpan.textContent = '0';
+                statusSpan.textContent = '❌ Chưa có dữ liệu';
+                return;
+            }
+
+            let html = '';
+            accounts.forEach((acc, index) => {
+                html += `
+                    <div class="account-item">
+                        <div class="account-info">
+                            <div class="account-number">${index + 1}</div>
+                            <div>
+                                <div class="account-username">${escapeHtml(acc.username)}</div>
+                                <div class="account-password">${escapeHtml(acc.password)}</div>
+                            </div>
+                        </div>
+                        <div class="button-group">
+                            <button class="btn btn-copy-user" onclick="copyText('${escapeHtml(acc.username)}', 'Đã copy tài khoản: ${escapeHtml(acc.username)}')">
+                                📋 TK
+                            </button>
+                            <button class="btn btn-copy-pass" onclick="copyText('${escapeHtml(acc.password)}', 'Đã copy mật khẩu: ${escapeHtml(acc.password)}')">
+                                📋 MK
+                            </button>
+                            <button class="btn btn-copy-all" onclick="copyText('${escapeHtml(acc.username)}|${escapeHtml(acc.password)}', 'Đã copy toàn bộ: ${escapeHtml(acc.username)}|${escapeHtml(acc.password)}')">
+                                📋 All
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            listContainer.innerHTML = html;
+            totalSpan.textContent = accounts.length;
+            statusSpan.textContent = `✅ ${accounts.length} tài khoản`;
+        }
+
+        // Hàm copy
+        function copyText(text, message) {
+            if (!text) {
+                showToast('Không có dữ liệu để copy!', 'error');
+                return;
+            }
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast(message || 'Đã copy!', 'success');
+                }).catch(() => {
+                    fallbackCopy(text, message);
+                });
+            } else {
+                fallbackCopy(text, message);
+            }
+        }
+
+        // Fallback copy method
+        function fallbackCopy(text, message) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast(message || 'Đã copy!', 'success');
+            } catch (err) {
+                showToast('Không thể copy! Vui lòng thử lại.', 'error');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            
+            void toast.offsetWidth;
+            toast.classList.add('show');
+            
+            clearTimeout(toast.timeout);
+            toast.timeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Modal functions
+        function closeModal() {
+            document.getElementById('welcomeModal').classList.remove('active');
+        }
+
+        // Đóng modal khi click bên ngoài
+        document.getElementById('welcomeModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Đóng modal bằng phím ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Thêm drag and drop support
+        const fileInputWrapper = document.querySelector('.file-input-wrapper');
+        const fileInput = document.getElementById('fileInput');
+
+        fileInputWrapper.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#667eea';
+            this.style.background = '#e8ecf1';
+        });
+
+        fileInputWrapper.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#c3cfe2';
+            this.style.background = '#f5f7fa';
+        });
+
+        fileInputWrapper.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#c3cfe2';
+            this.style.background = '#f5f7fa';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                const event = new Event('change');
+                fileInput.dispatchEvent(event);
+            }
+        });
+
+        // Tự động load file khi trang được mở
+        window.addEventListener('DOMContentLoaded', function() {
+            // Tự động đọc file account.txt
+            loadAccountFile();
+        });
+
+        console.log('%c Từ Quang Nam - Quản Lý Tài Khoản ', 'background: #667eea; color: white; padding: 10px 20px; border-radius: 5px; font-size: 16px; font-weight: bold;');
+        console.log('%c Tự động đọc file account.txt cùng thư mục ❤️ ', 'background: #f5f7fa; color: #333; padding: 10px 20px; border-radius: 5px; font-size: 14px;');
+    </script>
+</body>
+</html>
